@@ -13,8 +13,7 @@ Secure, isolated compute environments with sub-second startup for agentic worklo
 ### Install and provision
 
 ```bash
-uv venv
-uv pip install azure-containerapps-sandbox azure-mgmt-resource azure-mgmt-authorization azure-identity
+uv sync --extra setup
 uv run python/samples/setup/setup.py
 ```
 
@@ -26,11 +25,12 @@ Optionally install the [`aca` CLI](https://sandboxes.azure.com/docs/sandboxes/qu
 
 ```bash
 cd python/samples/01-webapps/simple-anonymous/python
-uv pip install -r requirements.txt
 uv run run.py
 ```
 
 A sandbox boots, a Node.js app starts, and a public URL is printed. Open it in a browser to see a live system-stats page served from inside the sandbox. From here, pick any sample below.
+
+> **Legacy pip users:** Each sample folder has a `requirements.txt` you can install with `pip install -r requirements.txt` instead.
 
 ## Create and manage sandboxes
 

@@ -1,0 +1,27 @@
+[project]
+name = "aca-sandboxes-samples"
+version = "0.1.0"
+description = "Samples for Azure Container Apps Sandboxes"
+readme = "README.md"
+requires-python = ">=3.13"
+license = { text = "MIT" }
+dependencies = [
+    "azure-containerapps-sandbox>=0.1.0b1",
+    "azure-identity>=1.15.0",
+]
+
+[project.optional-dependencies]
+setup = [
+    "azure-mgmt-resource",
+    "azure-mgmt-authorization",
+]
+openai = [
+    "openai>=1.50.0",
+]
+agents = [
+    "openai-agents>=0.17.0",
+    "agents-extension-aca-sandboxes",
+]
+
+[tool.uv.sources]
+agents-extension-aca-sandboxes = { path = "python/samples/08-sandbox-agents/openai/sandbox-agent-extension", editable = true }
