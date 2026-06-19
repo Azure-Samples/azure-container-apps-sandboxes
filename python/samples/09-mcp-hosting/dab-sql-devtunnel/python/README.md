@@ -1,8 +1,7 @@
 # dab-sql-devtunnel — Python SDK driver
 
 ```bash
-pip install -r requirements.txt
-python run.py
+uv run run.py
 ```
 
 Configuration comes from `samples/.env` (written by

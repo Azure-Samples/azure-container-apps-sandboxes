@@ -1,6 +1,6 @@
 # Shared-blob memory swarm — `aca` CLI variant
 
-Same scenario as the [Python variant](../python/swarm.py), expressed in
+Same scenario as the [Python variant](../../../../../python/samples/04-swarms/02-shared-blob-memory/python/swarm.py), expressed in
 bash + the `aca` CLI. The platform-provided durability story is the
 same: one `aca sandboxgroup volume create --type AzureBlob` on the
 worker group, then every worker (and the aggregator) mounts it at
@@ -12,7 +12,7 @@ worker group, then every worker (and the aggregator) mounts it at
 ```
 
 Configuration is read from `samples/.env` (run
-[`../../../../setup`](../../../../setup) once if you haven't).
+[`python/samples/setup`](../../../../../python/samples/setup) once if you haven't).
 
 The full scenario story (cast table, sequence diagram, customer-value
 claims, production tips) lives in [`../README.md`](../README.md).
@@ -33,7 +33,7 @@ claims, production tips) lives in [`../README.md`](../README.md).
 ## Status
 
 End-to-end validated against the **Python SDK variant**
-(see `../python/swarm.py`) on `westus2`: 4 worker sandboxes each
+(see `python/samples/04-swarms/02-shared-blob-memory/python/swarm.py`) on `westus2`: 4 worker sandboxes each
 write a `worker-i.json` checkpoint to the shared volume, then a
 separate aggregator sandbox reads them back after the workers are
 deleted — π ≈ 3.141 across 4×10⁶ darts.

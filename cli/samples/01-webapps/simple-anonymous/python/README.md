@@ -9,8 +9,7 @@ One script, sharing the Node app in [`../app/`](../app/):
 ## Run
 
 ```bash
-pip install -r requirements.txt
-python run.py
+uv run run.py
 ```
 
 Reads configuration from `samples/.env`. Override the disk image with

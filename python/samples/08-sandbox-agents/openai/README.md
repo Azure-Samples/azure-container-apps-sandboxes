@@ -62,20 +62,17 @@ async SDK).
 
 ## Quick start
 
-```powershell
-# 1. install the provider (editable) + its dev deps
+```bash
+# 1. run the provider's unit tests (installs the editable provider + dev deps)
 cd sandbox-agent-extension
-python -m pip install -e ".[dev]"
-pytest -q                       # unit tests
+uv run --project . --extra dev pytest -q
 
 # 2. (optional) live lifecycle test against your sandbox group
-$env:ACA_LIVE_TEST = "1"
-pytest -q tests/test_live_lifecycle.py    # ~15s end-to-end
+ACA_LIVE_TEST=1 uv run --project . --extra dev pytest -q tests/test_live_lifecycle.py    # ~15s end-to-end
 
 # 3. run the deep research demo
-cd ..\01-deep-research-single
-python -m pip install -r requirements.txt
-python deep_research_agent.py
+cd ../01-deep-research-single
+uv run --extra agents deep_research_agent.py
 ```
 
 See [`01-deep-research-single/README.md`](01-deep-research-single/README.md) and

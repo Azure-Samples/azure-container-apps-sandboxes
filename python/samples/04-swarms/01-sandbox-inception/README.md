@@ -88,17 +88,11 @@ math — is the lesson.
 
 ## Run it
 
-After the [baseline setup](../../../setup) has written `samples/.env`:
+After the [baseline setup](../../setup) has written `samples/.env`:
 
 ```bash
-# Python SDK variant — end-to-end validated
 cd python
-pip install -r requirements.txt
-python swarm.py
-
-# OR: aca CLI variant — see cli/README.md for current status
-cd cli
-./run.sh
+uv run swarm.py
 ```
 
 Both end-to-end runs take ~3-5 minutes (group provisioning + RBAC
@@ -126,53 +120,6 @@ itself runs in seconds.
 ==> Cleaning up workers, orchestrator, both groups...
 ==> Done.
 ```
-
-## CLI variant — `aca config` is the showcase
-
-The CLI variant is built so that **`aca config`** is the obvious win
-over passing `--subscription` / `--resource-group` / `--group` /
-`--managed-identity` on every line. There are two distinct contexts in
-this swarm — host driving Group A, sandbox driving Group B — and
-config makes each one implicit.
-
-**Host side (driving Group A)** — set the orchestrator group as the
-current sandbox context once; every later `aca` call uses it:
-
-```bash
-aca config set -s "$ACA_SUBSCRIPTION" -r "$ACA_RESOURCE_GROUP"
-aca config sandbox set --group "$ORCH_GROUP"   # auto-detects region too
-aca config show                                # printed in run output
-
-aca sandboxgroup identity assign --system-assigned --name "$ORCH_GROUP"
-aca sandbox create --disk ubuntu               # implicit --group from config
-```
-
-**Sandbox side (driving Group B)** — env vars are the same source of
-truth as `aca config`, so a few `export`s flip the orchestrator's
-entire context onto the worker group + MI auth:
-
-```bash
-export ACA_SUBSCRIPTION=...
-export ACA_RESOURCE_GROUP=...
-export ACA_SANDBOX_GROUP="$WORKER_GROUP"
-export ACA_SANDBOX_MANAGED_IDENTITY=system     # use the group's MI
-export ACA_REGION=...
-
-/tmp/aca auth status                           # one-line proof: ARM authed via MI
-for i in $(seq 0 $((WORKERS-1))); do
-    /tmp/aca sandbox create --disk ubuntu --label worker=$i &
-done
-wait                                           # parallel fan-out — 4 lines
-```
-
-Without `aca config`, the same loop would carry
-`--subscription X --resource-group Y --group Z --managed-identity system`
-on every line — noisy, error-prone, and obscures the swarm logic. With
-config, the loop reads as the intent: *create four worker sandboxes*.
-
-`aca config show` runs **twice** in the script — once on the host,
-once inside the orchestrator — and both outputs are printed, so you
-see the two contexts side-by-side.
 
 ## Cleanup
 
@@ -212,5 +159,5 @@ aca sandboxgroup list -o tsv | awk '/^swarm-(orch|workers)-/ {print $1}' \
 
 - [`python/swarm.py`](python/swarm.py) — host script + uploaded
   in-orchestrator script + result aggregation.
-- [`cli/run.sh`](cli/run.sh) — bash equivalent with `aca config`
+- [`aca` CLI variant](../../../../cli/samples/04-swarms/01-sandbox-inception) — the bash equivalent with `aca config`
   ergonomics.

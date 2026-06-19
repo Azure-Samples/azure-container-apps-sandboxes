@@ -29,20 +29,18 @@ scenario over and over without sending an actual email.
 ## Quick start
 
 ```bash
-pip install -r requirements.txt
-
 # at minimum: bring up the cloud bits once with `azd up` in the
 # scenario root, then export the values the runner needs:
 export $(azd env get-values | grep -E '^(CONNECTOR_GATEWAY_ID|TEAMS_MCP_SERVER_CONFIG_NAME|CONNECTOR_GATEWAY_API_KEY)=' | xargs)
 
 # default — use the bundled sample-email.json
-python run.py
+uv run --extra connectors run.py
 
 # different payload
-python run.py --email path/to/your-email.json
+uv run --extra connectors run.py --email path/to/your-email.json
 
 # render the prompt + print the egress plan without booting anything
-python run.py --dry-run
+uv run --extra connectors run.py --dry-run
 ```
 
 ## Sample input

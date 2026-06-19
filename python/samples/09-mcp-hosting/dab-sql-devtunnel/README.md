@@ -66,8 +66,7 @@ flowchart LR
 
 ```bash
 cd python
-pip install -r requirements.txt
-python run.py
+uv run run.py
 ```
 
 Total runtime: ~3 minutes for the automated steps, plus however long
@@ -270,6 +269,5 @@ dab-sql-devtunnel/
 │   └── dab-config.json        ← uploaded into the sandbox
 └── python/
     ├── README.md
-    ├── requirements.txt
     └── run.py
 ```

@@ -14,7 +14,7 @@ first** — this file only covers what's specific to Copilot CLI.
 | Folder                  | When to use                                                                 |
 | ----------------------- | --------------------------------------------------------------------------- |
 | [`python/`](python/)    | You prefer the SDK. Run `copilot` from the portal's `bash` tab.             |
-| [`cli/`](cli/)          | You prefer bash. After paste, the script drops you into `aca sandbox shell` so you can run `copilot` from your own terminal. |
+| [`aca` CLI variant](../../../../cli/samples/02-coding-agents/gh-copilot-cli) | You prefer bash. After paste, the script drops you into `aca sandbox shell` so you can run `copilot` from your own terminal. |
 
 Both flows produce the same sandbox: deny-default egress, four
 GitHub host-allows, three Transform rules with `Authorization` Values
@@ -70,7 +70,7 @@ agent phase, not the installer phase.
 ### YOLO mode
 
 Once the PAT is pasted, in either the portal bash tab or the local
-shell opened by `cli/run.sh`:
+shell opened by the [`aca` CLI variant](../../../../cli/samples/02-coding-agents/gh-copilot-cli):
 
 ```bash
 copilot --allow-all-tools -p "<your prompt>"

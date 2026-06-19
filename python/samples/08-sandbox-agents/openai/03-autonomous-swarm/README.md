@@ -82,21 +82,21 @@ sequenceDiagram
 
 ## Run modes
 
-```powershell
+```bash
 # Just provision + upload + import-check (~60s). No AOAI calls.
-python launcher.py --dry-run
+uv run --extra agents launcher.py --dry-run
 
 # Provision + auth validation (acquires MI token in sandbox, calls /models,
 # lists worker group sandboxes). ~3 min. No worker spawns, no LLM tokens.
-python launcher.py --smoke-run
+uv run --extra agents launcher.py --smoke-run
 
 # Full run: decompose, fan out workers, synthesize.
-python launcher.py --task "Compare the SandboxGroupClient async vs sync API surface" --workers 3
+uv run --extra agents launcher.py --task "Compare the SandboxGroupClient async vs sync API surface" --workers 3
 
 # Keep sandbox groups after the run (for debugging). The AOAI role
 # assignment is ALWAYS cleaned up even with --keep, so the orchestrator MI
 # never retains AOAI access after the launcher exits.
-python launcher.py --task "..." --workers 3 --keep
+uv run --extra agents launcher.py --task "..." --workers 3 --keep
 ```
 
 ## Expected wall time

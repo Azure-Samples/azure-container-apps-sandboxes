@@ -7,14 +7,13 @@ production tips.
 ## Quick start
 
 ```bash
-pip install -r requirements.txt
-python pipeline.py
+uv run pipeline.py
 ```
 
 Tune with environment variables:
 
 ```bash
-PIPELINE_BATCHES=50 PIPELINE_EVENTS_PER_BATCH=500 python pipeline.py
+PIPELINE_BATCHES=50 PIPELINE_EVENTS_PER_BATCH=500 uv run pipeline.py
 ```
 
 ## Files

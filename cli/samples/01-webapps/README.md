@@ -18,7 +18,7 @@ Each pattern is fully self-contained under its own folder:
 ├── simple-anonymous/
 │   ├── README.md
 │   ├── app/{server.js, package.json}
-│   ├── python/{run.py, requirements.txt, README.md}
+│   ├── python/{run.py, README.md}
 │   └── cli/{run.sh, README.md}
 └── authenticated/                   ← coming soon
     └── …

@@ -7,11 +7,10 @@ across N=4 worker sandboxes via `ManagedIdentityCredential` +
 `asyncio.gather` from **inside** the orchestrator.
 
 ```bash
-pip install -r requirements.txt
-python swarm.py
+uv run swarm.py
 ```
 
-Configuration is read from `samples/.env` (run [`../../../../setup`](../../../../setup)
+Configuration is read from `samples/.env` (run [`../../../setup`](../../../setup)
 once if you haven't).
 
 The full scenario story lives in [`../README.md`](../README.md).

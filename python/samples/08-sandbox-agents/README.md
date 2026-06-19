@@ -27,7 +27,7 @@ Each subfolder ships:
   [`03-autonomous-swarm/`](openai/03-autonomous-swarm) (harness-in-compute,
   zero-secret).
 - For the placeholders: a small reusable adapter module + `agent.py` +
-  `README.md` + `requirements.txt`, following the same shape as the
+  `README.md`, following the same shape as the
   realized OpenAI variant.
 
 ## The shared pattern
@@ -93,9 +93,7 @@ the same shape. The same three primitives shown here (`exec`,
 
 ## Prerequisites
 
-- Shared sandbox baseline provisioned —
-  `python/samples/setup/setup.py` **or**
-  `python/samples/setup/setup.py`.
+- Shared sandbox baseline provisioned with `uv run python/samples/setup/setup.py`.
 - Framework-specific model auth (OpenAI / Azure OpenAI key, or
   Anthropic API key) — see each subfolder's README.
 
@@ -103,8 +101,7 @@ the same shape. The same three primitives shown here (`exec`,
 
 ```bash
 cd openai/01-deep-research-single
-pip install -r requirements.txt
-python deep_research_agent.py
+uv run --extra agents deep_research_agent.py
 ```
 
 ## What it composes

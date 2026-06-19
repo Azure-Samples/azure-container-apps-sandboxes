@@ -23,15 +23,15 @@ Before running this demo, ensure you have:
    - Endpoint URL
    - Deployment name  
    - API key  
-✅ **Python 3.10+** installed
+✅ **[uv](https://docs.astral.sh/uv/getting-started/installation/)** installed (handles Python 3.13+)
 
 **Need help setting up ACA Sandboxes?** See [python/samples/setup](../../../setup/)
 
 ## Quick Start
 
 ### 1. Navigate to demo folder
-```powershell
-cd samples/sandboxes/scenarios/08-sandbox-agents/openai/01-deep-research-single
+```bash
+cd python/samples/08-sandbox-agents/openai/01-deep-research-single
 ```
 
 ### 2. Set up environment variables
@@ -40,12 +40,7 @@ This demo (and the provider package) auto-discovers `samples/.env` at the
 repo's `samples/` root by walking up the directory tree. You only need to
 populate it **once** for all samples in this repo.
 
-```powershell
-# From the repo root
-notepad samples\.env
-```
-
-Add (or update) the following keys. `samples/.env` is gitignored.
+Open `samples/.env` (it's gitignored) and add (or update) the following keys:
 
 ```bash
 # Azure OpenAI (required)
@@ -69,40 +64,27 @@ demo reads — you don't need to copy it locally.
 - **ACA Sandboxes**: Run `aca config show` to see your configured values
 - If you don't have ACA sandboxes set up yet, see the [main README](../README.md)
 
-### 3. Install dependencies
+### 3. Run the demo
 
-```powershell
-# Upgrade pip (recommended)
-python -m pip install --upgrade pip
+`uv run --extra agents` installs everything the demo needs on first use (the OpenAI Agents SDK, the ACA Sandboxes SDK, and the `agents_aca_sandboxes` provider extension):
 
-# Install all dependencies including the ACA sandboxes provider
-python -m pip install -r requirements.txt
-```
-
-This installs:
-- `openai-agents` — OpenAI Agents SDK
-- `azure-containerapps-sandbox` — ACA Sandboxes SDK
-- `agents_aca_sandboxes` — The provider extension (from `../sandbox-agent-extension/`)
-
-### 4. Run the demo
-
-```powershell
+```bash
 # Default: analyzes this ai-apps repo to learn about ACA Sandboxes
-python deep_research_agent.py "What are ACA Sandboxes and their key features?"
+uv run --extra agents deep_research_agent.py "What are ACA Sandboxes and their key features?"
 
 # Analyze any GitHub repo
-python deep_research_agent.py \
+uv run --extra agents deep_research_agent.py \
   --repo https://github.com/kubernetes/kubernetes \
   "How does the Kubernetes scheduler work?"
 ```
 
-### 5. View results
+### 4. View results
 
 Results are printed directly to the console with the answer formatted in a nice box.
 
 To save results to a file, redirect output:
-```powershell
-python deep_research_agent.py "What are ACA Sandboxes?" > research_report.md
+```bash
+uv run --extra agents deep_research_agent.py "What are ACA Sandboxes?" > research_report.md
 ```
 
 Typical run: **~60–120s** depending on repo size and question complexity.
@@ -111,18 +93,18 @@ Typical run: **~60–120s** depending on repo size and question complexity.
 
 See [`EXAMPLES.md`](EXAMPLES.md) for 8 ready-to-run examples. Quick samples:
 
-```powershell
+```bash
 # Analyze OpenAI Agents SDK capabilities
-python deep_research_agent.py --repo https://github.com/openai/openai-agents-python "What are the main agent capabilities provided by this SDK? List them with examples."
+uv run --extra agents deep_research_agent.py --repo https://github.com/openai/openai-agents-python "What are the main agent capabilities provided by this SDK? List them with examples."
 
 # Analyze Kubernetes scheduler architecture
-python deep_research_agent.py --repo https://github.com/kubernetes/kubernetes "How does the Kubernetes scheduler work? Explain the scheduling algorithm and key components."
+uv run --extra agents deep_research_agent.py --repo https://github.com/kubernetes/kubernetes "How does the Kubernetes scheduler work? Explain the scheduling algorithm and key components."
 
 # Analyze FastAPI performance features
-python deep_research_agent.py --repo https://github.com/fastapi/fastapi "What makes FastAPI fast? List the performance optimizations and architectural decisions."
+uv run --extra agents deep_research_agent.py --repo https://github.com/fastapi/fastapi "What makes FastAPI fast? List the performance optimizations and architectural decisions."
 
 # Analyze PyTorch autograd system
-python deep_research_agent.py --repo https://github.com/pytorch/pytorch "How does PyTorch's autograd system work? Explain the automatic differentiation mechanism."
+uv run --extra agents deep_research_agent.py --repo https://github.com/pytorch/pytorch "How does PyTorch's autograd system work? Explain the automatic differentiation mechanism."
 ```
 
 ## Example output

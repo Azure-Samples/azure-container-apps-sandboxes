@@ -13,7 +13,7 @@ Secure, isolated compute environments with sub-second startup for agentic worklo
 ### Install and provision
 
 ```bash
-uv sync --extra setup
+uv sync
 uv run python/samples/setup/setup.py
 ```
 
@@ -29,8 +29,6 @@ uv run run.py
 ```
 
 A sandbox boots, a Node.js app starts, and a public URL is printed. Open it in a browser to see a live system-stats page served from inside the sandbox. From here, pick any sample below.
-
-> **Prefer pip?** Each sample folder has a `requirements.txt` you can install with `pip install -r requirements.txt` instead.
 
 ## Create and manage sandboxes
 
@@ -59,7 +57,7 @@ Each scenario includes a README with architecture notes, prerequisites, and step
 | 01 | webapps | Web app in a sandbox, anonymous or Entra-gated | [Python](python/samples/01-webapps) | [CLI](cli/samples/01-webapps) |
 | 02 | coding-agents | Copilot CLI in a sandbox with deny-default egress | [Python](python/samples/02-coding-agents) | [CLI](cli/samples/02-coding-agents) |
 | 03 | code-interpreter | LLM-driven code execution: generate, run, observe, iterate | [Python](python/samples/03-code-interpreter) | - |
-| 04 | swarms | Orchestrator coordinating many sandbox workers | [Python](python/samples/04-swarms) | - |
+| 04 | swarms | Orchestrator coordinating many sandbox workers | [Python](python/samples/04-swarms) | [CLI](cli/samples/04-swarms) |
 | 05 | data-processing | Producer/consumer pipelines on shared AzureBlob volumes | [Python](python/samples/05-data-processing) | - |
 | 06 | developer-workflows | PR builds, ephemeral CI, on-demand dev environments | [Python](python/samples/06-developer-workflows) | - |
 | 07 | computer-use | LLM computer-use agent driving Chrome inside a sandbox | - | - |

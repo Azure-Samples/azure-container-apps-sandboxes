@@ -24,8 +24,7 @@ Composes:
 Run::
 
     cd python
-    pip install -r requirements.txt
-    python ci.py
+    uv run ci.py
 """
 
 from __future__ import annotations

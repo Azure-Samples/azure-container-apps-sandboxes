@@ -11,7 +11,6 @@ described in the [parent README](../README.md). One file
 |---|---|
 | [`python/run.py`](python/run.py) | The whole demo. ~400 lines. |
 | [`python/data/sales.csv`](python/data/sales.csv) | 36-row monthly sales dataset across three channels (Online / Retail / Wholesale). Staged into `/workspace/data/` inside the sandbox. |
-| [`python/requirements.txt`](python/requirements.txt) | `openai` + the shared sandbox baseline. |
 
 ## Tools the model can call
 
@@ -23,7 +22,7 @@ described in the [parent README](../README.md). One file
 
 ## Prerequisites
 
-1. The sandbox baseline is provisioned (`python/samples/setup/setup.py` or `setup/cli/setup.sh`). This writes the `ACA_*` keys to `samples/.env`.
+1. The sandbox baseline is provisioned (`uv run python/samples/setup/setup.py`). This writes the `ACA_*` keys to `samples/.env`.
 2. An **Azure OpenAI** deployment that supports tool calling — `gpt-4o`, `gpt-4o-mini`, `gpt-4.1`, `gpt-5`, `o4-mini` all qualify.
 3. The following added to `samples/.env`:
 
@@ -42,19 +41,18 @@ described in the [parent README](../README.md). One file
 
 ```bash
 cd python
-pip install -r requirements.txt
 
 # default prompt: explore sales.csv
-python run.py
+uv run --extra openai run.py
 
 # custom prompt
-python run.py "Which months have the highest revenue per marketing dollar, per channel? Save a stacked bar chart of revenue by channel to /workspace/out/efficiency.png."
+uv run --extra openai run.py "Which months have the highest revenue per marketing dollar, per channel? Save a stacked bar chart of revenue by channel to /workspace/out/efficiency.png."
 
 # override the model deployment for one run
-python run.py --model gpt-4o-mini "..."
+uv run --extra openai run.py --model gpt-4o-mini "..."
 
 # cap the loop tighter
-python run.py --max-turns 8 "..."
+uv run --extra openai run.py --max-turns 8 "..."
 ```
 
 Plots saved by the model under `/workspace/out/` are auto-downloaded to

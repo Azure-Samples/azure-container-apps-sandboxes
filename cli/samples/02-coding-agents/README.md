@@ -161,8 +161,7 @@ identity; entitlement is checked server-side by GitHub.
 
 ```bash
 cd gh-copilot-cli/python
-pip install -r requirements.txt
-python copilot.py
+uv run copilot.py
 ```
 
 The Python flow prints the portal URL and waits — you paste the PAT

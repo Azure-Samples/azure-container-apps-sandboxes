@@ -95,7 +95,6 @@ sequenceDiagram
 ├── README.md                       (this file)
 └── python/
     ├── README.md
-    ├── requirements.txt
     ├── ci.py                       host: drives the whole CI run
     └── prs/                        synthetic PR diffs (uploaded into PR sandboxes)
         ├── pr-1/                   clean implementation; tests PASS
@@ -118,10 +117,9 @@ PR diff source in as `prs/pr-N/...` and it works the same way.
 
 ```bash
 cd python
-pip install -r requirements.txt
-python ci.py                    # builds pr-1, pr-2, pr-3 (defaults)
-python ci.py pr-1 pr-2          # only those two
-python ci.py pr-3               # see a failing PR by itself
+uv run ci.py                    # builds pr-1, pr-2, pr-3 (defaults)
+uv run ci.py pr-1 pr-2          # only those two
+uv run ci.py pr-3               # see a failing PR by itself
 ```
 
 Wall time: about 60–90 s end to end (cold boot + pip install

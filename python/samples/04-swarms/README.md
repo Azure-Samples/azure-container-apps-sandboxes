@@ -3,8 +3,8 @@
 A *swarm* is one orchestrator coordinating many sandbox workers. The
 interesting axis is **who the orchestrator is and how it dispatches**
 — workers themselves are just sandboxes. This folder collects swarm
-variants, each in its own numbered subfolder with the standard
-`python/` + `cli/` split.
+variants, each in its own numbered subfolder. The `aca` CLI variants
+live under [`cli/samples/04-swarms`](../../../cli/samples/04-swarms).
 
 ```mermaid
 flowchart LR
@@ -68,13 +68,10 @@ group, and no credential is ever materialised inside an agent.
 
 ## Prerequisites
 
-Run the baseline once — either flow works, both write the same
-`samples/.env`:
+Run the baseline once to write `samples/.env`:
 
 ```bash
-cd ../../setup/python && pip install -r requirements.txt && python setup.py
-# or
-cd ../../setup/cli && ./setup.sh
+cd ../../setup && uv run setup.py
 ```
 
-Each variant's README has the per-variant run instructions.
+Each scenario's README has the per-scenario run instructions.

@@ -89,7 +89,6 @@ Where the gateway API key lives (and doesn't):
 │   └── triage.md              canonical triage prompt (receiver + local runner read this)
 └── python/                    local-dev runner — no azd needed
     ├── README.md
-    ├── requirements.txt
     ├── run.py                 boots a sandbox with a sample payload
     └── samples/sample-email.json
 ```
@@ -109,7 +108,7 @@ Where the gateway API key lives (and doesn't):
 ## Cloud-deployed quickstart (`azd up`)
 
 ```bash
-cd samples/sandboxes/scenarios/10-connectors-email-triage
+cd python/samples/10-connectors-email-triage
 
 azd auth login            # one-time, if you haven't already
 azd env new email-triage  # any short name
@@ -153,13 +152,12 @@ MCP endpoint you give it. Useful for iterating on
 
 ```bash
 cd python
-pip install -r requirements.txt
 
 # Reuse the cloud deployment's values (run after at least one `azd up`):
 export $(azd env get-values | grep -E '^(CONNECTOR_GATEWAY_ID|TEAMS_MCP_SERVER_CONFIG_NAME|CONNECTOR_GATEWAY_API_KEY)=' | xargs)
 
-python run.py --dry-run    # render the prompt + print the egress plan
-python run.py              # actually boot the sandbox and run Copilot
+uv run --extra connectors run.py --dry-run    # render the prompt + print the egress plan
+uv run --extra connectors run.py              # actually boot the sandbox and run Copilot
 ```
 
 See [`python/README.md`](python/README.md) for full options.
@@ -225,9 +223,6 @@ See [`python/README.md`](python/README.md) for full options.
 - **Single-tenant.** Both connections are owned by whoever consented.
   Multi-tenant requires using `connections/accessPolicies` and
   per-tenant gateway secrets — out of scope here.
-- **No CLI flavor (`aca` CLI script) of this scenario.** The
-  Connector Gateway ops aren't (yet) wrapped by `aca sandboxgroup ...` —
-  use `az rest` or the `azd` flow above.
 
 ## Tear down
 

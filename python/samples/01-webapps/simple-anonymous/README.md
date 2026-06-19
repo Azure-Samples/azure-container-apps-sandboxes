@@ -30,37 +30,16 @@ and a get-started panel for visitors to spin up their own.
 
 ## Prerequisites
 
-- `python/samples/.env` populated (run `python python/samples/setup/setup.py` from the repo root if you haven't yet)
+- `python/samples/.env` populated (run `uv run python/samples/setup/setup.py` from the repo root if you haven't yet)
 
 ## Run it
 
-### Python SDK
-
-**Bash (macOS / Linux)**
 ```bash
 cd python
-pip install -r requirements.txt
-python run.py
+uv run run.py
 ```
 
-**PowerShell (Windows)**
-```powershell
-cd python
-pip install -r requirements.txt
-python run.py
-```
-
-### `aca` CLI
-
-**Bash (macOS / Linux / WSL / git-bash)**
-```bash
-cd cli
-bash run.sh
-```
-
-> On Windows without bash, use the Python flavor above.
-
-Both flows read configuration from `samples/.env`. Override the disk
+Reads configuration from `samples/.env`. Override the disk
 image with `ACA_WEBAPP_DISK=...` (default: `node-22`).
 
 ## Production tips
@@ -89,14 +68,10 @@ image with `ACA_WEBAPP_DISK=...` (default: `node-22`).
 ```
 simple-anonymous/
 ├── README.md              ← this file
-├── app/                   ← Node app (shared by python and cli)
+├── app/                   ← Node app (shared by all variants)
 │   ├── server.js
 │   └── package.json
-├── python/
-│   ├── README.md
-│   ├── requirements.txt
-│   └── run.py
-└── cli/
+└── python/
     ├── README.md
-    └── run.sh
+    └── run.py
 ```

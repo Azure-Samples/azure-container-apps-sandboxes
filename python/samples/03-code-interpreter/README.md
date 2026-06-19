@@ -72,13 +72,12 @@ The line is "**who drives the loop**":
 
 ```bash
 cd openai/python
-pip install -r requirements.txt
 
 # Default prompt: analyse the bundled sales.csv
-python run.py
+uv run --extra openai run.py
 
 # Or supply your own
-python run.py "What month had the highest revenue per dollar of marketing spend, per channel?"
+uv run --extra openai run.py "What month had the highest revenue per dollar of marketing spend, per channel?"
 ```
 
 The harness will print each model turn (which tool was called, head of

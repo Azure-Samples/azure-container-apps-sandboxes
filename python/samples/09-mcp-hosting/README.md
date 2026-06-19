@@ -81,10 +81,10 @@ so you can stop at whichever matches where you're working:
 
 ## Status
 
-| Pattern | Python SDK | `aca` CLI |
-|---|---|---|
-| `excalidraw-anonymous` | ✅ ready | 📝 planned |
-| `dab-sql-devtunnel` | ✅ ready | 📝 planned |
+| Pattern | Status |
+|---|---|
+| `excalidraw-anonymous` | ✅ ready |
+| `dab-sql-devtunnel` | ✅ ready |
 
 ## Composes with these guides
 

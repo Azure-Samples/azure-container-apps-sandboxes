@@ -13,13 +13,7 @@ One script, sharing the Node app in [`../app/`](../app/):
 
 ## Run
 
-**Bash (macOS / Linux)**
 ```bash
-bash run.sh
-```
-
-**PowerShell (Windows)**
-```powershell
 bash run.sh
 ```
 

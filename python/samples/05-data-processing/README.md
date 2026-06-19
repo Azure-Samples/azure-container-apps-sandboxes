@@ -137,8 +137,7 @@ sequenceDiagram
 
 ```bash
 cd python
-pip install -r requirements.txt
-python pipeline.py
+uv run pipeline.py
 ```
 
 End-to-end run takes ~30–60 s on a warm sandbox group: ~10 s of
@@ -219,9 +218,3 @@ PIPELINE REPORT
   reader's memory budget). For very large batches, switch the format
   to Parquet — the workers stay stdlib if you add `pyarrow` to the
   sandbox.
-
-## CLI variant
-
-A `bash` / `aca` CLI variant is not yet shipped. The pattern (one
-host script, three workers staged via `aca sandbox fs write`, mount via
-`aca sandbox apply -f` YAML) is straightforward; PRs welcome.

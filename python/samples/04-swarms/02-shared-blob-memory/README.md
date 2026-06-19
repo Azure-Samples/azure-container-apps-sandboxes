@@ -161,9 +161,8 @@ the aggregated payload — proving the data is still there once
 ## Run it
 
 ```bash
-cd samples/sandboxes/scenarios/04-swarms/02-shared-blob-memory/python
-pip install -r requirements.txt
-python swarm.py
+cd python/samples/04-swarms/02-shared-blob-memory/python
+uv run swarm.py
 ```
 
 End-to-end run takes ~3–4 minutes (provision two groups, create

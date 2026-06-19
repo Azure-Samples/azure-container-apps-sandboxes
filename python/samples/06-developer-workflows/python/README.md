@@ -6,11 +6,9 @@ sequence diagram, and production tips.
 ## Quick start
 
 ```bash
-pip install -r requirements.txt
-
-python ci.py                    # build the default 3 PRs (1 + 2 pass, 3 fails)
-python ci.py pr-1 pr-2          # build a subset
-python ci.py pr-3               # see a failing build in isolation
+uv run ci.py                    # build the default 3 PRs (1 + 2 pass, 3 fails)
+uv run ci.py pr-1 pr-2          # build a subset
+uv run ci.py pr-3               # see a failing build in isolation
 ```
 
 The script's exit code matches CI conventions:

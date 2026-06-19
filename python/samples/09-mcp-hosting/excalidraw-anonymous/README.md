@@ -50,8 +50,7 @@ No browser sign-in, no service accounts, no extra secrets.
 
 ```bash
 cd python
-pip install -r requirements.txt
-python run.py
+uv run run.py
 ```
 
 Total runtime: ~2 minutes. The script prints the public MCP URL and
@@ -185,6 +184,5 @@ excalidraw-anonymous/
 ├── README.md           ← this file
 └── python/
     ├── README.md
-    ├── requirements.txt
     └── run.py
 ```

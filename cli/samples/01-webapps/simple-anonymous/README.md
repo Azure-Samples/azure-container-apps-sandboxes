@@ -30,29 +30,19 @@ and a get-started panel for visitors to spin up their own.
 
 ## Prerequisites
 
-- `python/samples/.env` populated (run `python python/samples/setup/setup.py` from the repo root if you haven't yet)
+- `python/samples/.env` populated (run `uv run python/samples/setup/setup.py` from the repo root if you haven't yet)
 
 ## Run it
 
 ### Python SDK
 
-**Bash (macOS / Linux)**
 ```bash
 cd python
-pip install -r requirements.txt
-python run.py
-```
-
-**PowerShell (Windows)**
-```powershell
-cd python
-pip install -r requirements.txt
-python run.py
+uv run run.py
 ```
 
 ### `aca` CLI
 
-**Bash (macOS / Linux / WSL / git-bash)**
 ```bash
 cd cli
 bash run.sh
@@ -94,7 +84,6 @@ simple-anonymous/
 │   └── package.json
 ├── python/
 │   ├── README.md
-│   ├── requirements.txt
 │   └── run.py
 └── cli/
     ├── README.md
