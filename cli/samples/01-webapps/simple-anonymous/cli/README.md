@@ -17,6 +17,7 @@ One script, sharing the Node app in [`../app/`](../app/):
 bash run.sh
 ```
 
-> On Windows without WSL/git-bash, you can run the Python flavor instead (`cd ../python && python run.py`).
+> Prefer the SDK? See the Python version under
+> [`python/samples/01-webapps/simple-anonymous`](../../../../../python/samples/01-webapps/simple-anonymous).
 
 Override the sandbox disk image with `ACA_WEBAPP_DISK=...` (default: `node-22`).

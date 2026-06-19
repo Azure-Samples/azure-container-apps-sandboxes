@@ -8,7 +8,7 @@ on those topics.
 | # | Scenario | What it shows | Status |
 |---|---|---|---|
 | 01 | [webapps](01-webapps) | Run a web app in a sandbox; patterns include `simple-anonymous` (open to the internet) and (planned) `authenticated` (Entra-gated) | ✅ ready |
-| 02 | [coding-agents](02-coding-agents) | Run **Copilot CLI** in a sandbox with deny-default egress + portal-paste PAT injection (Python + CLI). Claude Code / Codex stubs included. | ✅ Copilot CLI ready |
+| 02 | [coding-agents](02-coding-agents) | Run **Copilot CLI** in a sandbox with deny-default egress + portal-paste PAT injection. Claude Code / Codex stubs included. | ✅ Copilot CLI ready |
 | 03 | [code-interpreter](03-code-interpreter) | LLM-driven code execution, generate, run, observe, iterate | 📝 planned |
 | 04 | [swarms](04-swarms) | Many sandboxes, one orchestrator, fan-out work across N workers (`sandbox-inception`, `shared-blob-memory`) | ✅ ready |
 | 05 | [data-processing](05-data-processing) | Producer/consumer pipelines on shared AzureBlob volumes | 📝 planned |
