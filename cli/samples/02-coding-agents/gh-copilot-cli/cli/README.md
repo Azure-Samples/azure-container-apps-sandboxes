@@ -1,4 +1,4 @@
-# Coding agents — Copilot CLI (CLI)
+# Coding agents: Copilot CLI (CLI)
 
 ```bash
 ./run.sh
@@ -16,10 +16,10 @@ Once you've pasted and pressed Enter, the script opens an
 will delete the sandbox.
 
 If you'd rather stay in the portal, you can use the sandbox page's
-`bash` tab and just press Enter in this terminal when done — then
+`bash` tab and just press Enter in this terminal when done, then
 `exit` immediately out of the local shell.
 
-`policy.yaml` is checked in verbatim — it contains no secrets, only
+`policy.yaml` is checked in verbatim, it contains no secrets, only
 the literal placeholder `PASTE_PAT_HERE` in each Transform rule's
 Value. See [../README.md](../README.md) for Copilot-specific notes
 (PAT scopes, hosts) and [../../README.md](../../README.md) for the

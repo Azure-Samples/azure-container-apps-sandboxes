@@ -1,2 +1,0 @@
-azure-containerapps-sandbox>=0.1.0b1
-azure-identity>=1.15.0

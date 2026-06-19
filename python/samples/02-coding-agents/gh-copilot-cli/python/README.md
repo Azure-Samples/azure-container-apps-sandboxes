@@ -1,8 +1,7 @@
-# Coding agents — Copilot CLI (Python)
+# Coding agents: Copilot CLI (Python)
 
 ```bash
-pip install -r requirements.txt
-python copilot.py
+uv run copilot.py
 ```
 
 The script provisions a sandbox, installs Copilot CLI, applies an

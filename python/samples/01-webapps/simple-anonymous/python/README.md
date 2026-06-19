@@ -8,21 +8,12 @@ One script, sharing the Node app in [`../app/`](../app/):
 
 ## Prerequisites
 
-- `python/samples/.env` populated (run `python python/samples/setup/setup.py` from the repo root if you haven't)
-- Python dependencies installed (see below)
+- `python/samples/.env` populated (run `uv run python/samples/setup/setup.py` from the repo root if you haven't)
 
 ## Run
 
-**Bash (macOS / Linux)**
 ```bash
-pip install -r requirements.txt
-python run.py
-```
-
-**PowerShell (Windows)**
-```powershell
-pip install -r requirements.txt
-python run.py
+uv run run.py
 ```
 
 Override the sandbox disk image with `ACA_WEBAPP_DISK=...` (default: `node-22`).

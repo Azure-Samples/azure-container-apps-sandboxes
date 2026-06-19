@@ -39,13 +39,13 @@ the deny-default egress policy with `X-API-Key` and
 OAuth consent on the SharePoint connections (`sharepointonline`
 for the trigger, `workiqsharepoint` for the MCP).
 
-**Confirm end-to-end** — drop one of the [sample invoices](samples/invoices)
+**Confirm end-to-end**, drop one of the [sample invoices](samples/invoices)
 into your input folder:
 
 | File | What it tests |
 |---|---|
 | `invoice-text.pdf` | the easy case (`pdftotext` extracts directly) |
-| `invoice-scanned.pdf` | same invoice as an image-only PDF — forces the agent through the `tesseract` OCR fallback |
+| `invoice-scanned.pdf` | same invoice as an image-only PDF, forces the agent through the `tesseract` OCR fallback |
 
 Within ~10 seconds the namespace poll fires, the sandbox wakes via
 the `OnDemand` activation, Copilot CLI walks the SharePoint MCP
@@ -73,7 +73,7 @@ Both PDFs extract to the same JSON:
 
 ⚠️ **While this sample is deployed**, every new file in the
 configured SharePoint library wakes the sandbox and Copilot CLI
-runs against it — that consumes GitHub Models tokens, SharePoint
+runs against it, that consumes GitHub Models tokens, SharePoint
 MCP calls, and a few seconds of sandbox compute per event. Fine
 for a hands-on demo; you almost certainly don't want it running
 indefinitely against your real library. Tear the sample down when
@@ -171,26 +171,26 @@ inside the sandbox**.
 |---|---|
 | **Connector Namespace MI** | Mints the bearer token attached to every trigger POST to the sandbox proxy. Granted `Container Apps SandboxGroup Data Owner` on the sandbox group so the proxy can wake the sandbox on demand. |
 | **Sandbox group MI** | Sandbox-side identity (used by the proxy + by `set_egress_policy` when post-deploy applies the Deny default). |
-| **sharepointonline connection** | OAuth-authorized to your SharePoint site. Used **only** by the trigger config — receives change notifications from SharePoint. |
-| **workiqsharepoint connection** | OAuth-authorized to your SharePoint site. Used **only** by the MCP server — the sandbox calls JSON-RPC tools (`getSiteByPath`, `readSmallBinaryFile`, `createSmallTextFile`) through this. |
+| **sharepointonline connection** | OAuth-authorized to your SharePoint site. Used **only** by the trigger config, receives change notifications from SharePoint. |
+| **workiqsharepoint connection** | OAuth-authorized to your SharePoint site. Used **only** by the MCP server, the sandbox calls JSON-RPC tools (`getSiteByPath`, `readSmallBinaryFile`, `createSmallTextFile`) through this. |
 | **mcpserverConfig (`kind: ManagedMcpServer`)** | The namespace-published MCP HTTP endpoint the sandbox connects to. Authenticates with `X-API-Key` (stamped by the egress proxy). |
-| **Egress proxy** | Deny default + Transform rules. Holds the MCP `X-API-Key` and the GitHub `Authorization` token. Stamps headers on outbound requests — the sandbox process never sees them. |
+| **Egress proxy** | Deny default + Transform rules. Holds the MCP `X-API-Key` and the GitHub `Authorization` token. Stamps headers on outbound requests, the sandbox process never sees them. |
 
-### What's enforced — and where
+### What's enforced: and where
 
 Three independent checks gate this flow; each is short-lived and
 audience-scoped:
 
-1. **Trigger → sandbox** — `adcproxy.io` validates the namespace
+1. **Trigger → sandbox**, `adcproxy.io` validates the namespace
    MI's bearer token (signature, `iss`, `aud=https://auth.adcproxy.io/`,
    `oid ∈ port.entraId.objectIds`). Wrong `oid` ⇒ **403**, no
    token ⇒ **401**.
-2. **Sandbox → MCP** — the namespace MCP HTTP endpoint requires
+2. **Sandbox → MCP**, the namespace MCP HTTP endpoint requires
    `X-API-Key`. The sandbox doesn't have the key; the egress proxy
    stamps it on every outbound request to the MCP host. A request
    leaving the sandbox to any other host without a matching
    Transform rule is dropped by the Deny default.
-3. **MCP → SharePoint** — the upstream `workiqsharepoint` MCP
+3. **MCP → SharePoint**, the upstream `workiqsharepoint` MCP
    server uses the connection's OAuth token (acquired once at deploy
    via the official `listConsentLinks` + `confirmConsentCode` ARM
    APIs that postdeploy.py drives) to call
@@ -199,7 +199,7 @@ audience-scoped:
 The sandbox holds **no SharePoint credential, no MCP API key**.
 Compromise of the sandbox process leaks only the GitHub PAT
 (needed locally by Copilot CLI to authenticate to GitHub Models
-*before any network call* — see [Going further](#going-further-per-file-child-sandboxes)
+*before any network call*, see [Going further](#going-further-per-file-child-sandboxes)
 for why this trade-off exists and the path off it).
 
 ### Where the namespace API key lives
@@ -240,7 +240,7 @@ translate.
 
 ## Re-iterating without `azd up`
 
-For prompt or listener tweaks you don't need a full provision —
+For prompt or listener tweaks you don't need a full provision,
 the post-deploy script also exposes a `--skip-oauth` mode that
 hot-reloads the sandbox without re-popping the OAuth tabs:
 
@@ -262,8 +262,8 @@ other tenant in the sandbox group, but multiple files from the same
 SharePoint library share the same ACA Sandbox VM (in per-run
 workspaces `/work/<run_id>/`).
 
-For **true per-file isolation** — one ACA Sandbox per invoice,
-destroyed after — the host listener would spawn a child sandbox per
+For **true per-file isolation**, one ACA Sandbox per invoice,
+destroyed after, the host listener would spawn a child sandbox per
 incoming trigger. That requires an Azure credential **inside** the
 host sandbox to call `Microsoft.App/sandboxGroups/.../begin_create_sandbox`.
 Whether sandboxes expose IMDS / an attached MI in this preview is

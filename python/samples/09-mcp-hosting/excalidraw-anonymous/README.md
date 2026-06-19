@@ -1,9 +1,9 @@
-# excalidraw-anonymous — public MCP server in a sandbox
+# excalidraw-anonymous: public MCP server in a sandbox
 
 Host [`excalidraw-mcp`](https://github.com/excalidraw/excalidraw-mcp)
 inside an Azure Container Apps sandbox and expose it at a public,
 anonymous HTTPS URL using `add_port`. Connect from VS Code Copilot
-Chat, Claude Desktop, ChatGPT Connectors, or this Copilot CLI — ask
+Chat, Claude Desktop, ChatGPT Connectors, or this Copilot CLI, ask
 your agent to draw a diagram and it renders inline in chat as a
 hand-drawn whiteboard.
 
@@ -14,12 +14,12 @@ hand-drawn whiteboard.
 ## Why this pattern
 
 This is the **simplest possible "MCP server in Azure" demo**. There is
-no database, no .NET, no tunnel, and no login — just a Node.js MCP
+no database, no .NET, no tunnel, and no login, just a Node.js MCP
 server, one open port, and a public URL. It's the right pattern when:
 
 - The MCP server is **self-contained** (no DB, no secrets).
 - It's **OK to be public** (anonymous read/write to *this server's*
-  in-memory state — Excalidraw stores its scene in the sandbox).
+  in-memory state, Excalidraw stores its scene in the sandbox).
 - You want a **5-minute end-to-end demo** of MCP-in-a-sandbox without
   any extra moving parts.
 
@@ -38,7 +38,7 @@ flowchart LR
 
 1. An Azure subscription with the **Azure Container Apps sandbox**
    feature enabled. (See repo root [setup guide](../../../setup/).)
-2. Azure CLI logged in (`az login`) — the script uses
+2. Azure CLI logged in (`az login`), the script uses
    `DefaultAzureCredential` to authenticate to the sandbox group.
 3. Python 3.10+.
 4. `samples/.env` written by `python/samples/setup/setup.py`
@@ -50,8 +50,7 @@ No browser sign-in, no service accounts, no extra secrets.
 
 ```bash
 cd python
-pip install -r requirements.txt
-python run.py
+uv run run.py
 ```
 
 Total runtime: ~2 minutes. The script prints the public MCP URL and
@@ -66,7 +65,7 @@ waits for you to press Enter before tearing the sandbox down.
 3. Runs `npm install` and `npm run build`.
 4. Starts the server on port `80` as a background process.
 5. Polls in-sandbox readiness on `POST /mcp` with an MCP `initialize`
-   request — no `sleep N` guesses.
+   request, no `sleep N` guesses.
 6. Calls `sandbox.add_port(80, anonymous=True)` → public URL like
    `https://<sandbox-id>--80.<region>.adcproxy.io/mcp`.
 7. Verifies the public URL with a real MCP `initialize` handshake
@@ -95,7 +94,7 @@ Once the URL is in your MCP client, ask your agent in normal chat:
 - *"Sketch the request flow for a JWT auth handshake."*
 - *"Export the current scene to excalidraw.com so I can share it."*
 
-The diagram renders inline in chat. State persists in the sandbox —
+The diagram renders inline in chat. State persists in the sandbox,
 restart your IDE and the scene is still there until you tear the
 sandbox down.
 
@@ -163,16 +162,16 @@ python -c "from azure.identity import DefaultAzureCredential; from azure.contain
 
 ## Production hardening tips
 
-- **Bake the disk.** [Guide 03 (disks)](../../../guides/03-disks/README.md)
-  — pre-install Node + a built `excalidraw-mcp` so each cold start
+- **Bake the disk.** [Guide 03 (disks)](../../../guides/03-disks/README.md):
+  pre-install Node + a built `excalidraw-mcp` so each cold start
   skips `npm install` and `npm run build` (~90s saved).
-- **Snapshot post-build.** [Guide 02 (snapshots)](../../../guides/02-snapshots/README.md)
-  — resume into a fully built MCP server in ~1s.
-- **Auto-suspend.** [Guide 05 (lifecycle)](../../../guides/05-lifecycle/README.md)
-  — idle MCP sandboxes shouldn't burn quota; suspend on inactivity and
+- **Snapshot post-build.** [Guide 02 (snapshots)](../../../guides/02-snapshots/README.md):
+  resume into a fully built MCP server in ~1s.
+- **Auto-suspend.** [Guide 05 (lifecycle)](../../../guides/05-lifecycle/README.md):
+  idle MCP sandboxes shouldn't burn quota; suspend on inactivity and
   resume on the next request.
-- **One sandbox per user.** [Guide 11 (labels)](../../../guides/11-labels/README.md)
-  — tag with `{"user": "alice@..."}` and look up with
+- **One sandbox per user.** [Guide 11 (labels)](../../../guides/11-labels/README.md):
+  tag with `{"user": "alice@..."}` and look up with
   `list_sandboxes(labels=...)` so each user gets their own drawing
   surface.
 - **Move to Entra-gated exposure** for anything beyond a demo:
@@ -185,6 +184,5 @@ excalidraw-anonymous/
 ├── README.md           ← this file
 └── python/
     ├── README.md
-    ├── requirements.txt
     └── run.py
 ```

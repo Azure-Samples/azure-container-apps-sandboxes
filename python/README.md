@@ -1,6 +1,6 @@
 # 15 · Python SDK reference
 
-Reference documentation for the `azure-containerapps-sandbox` Python SDK. Covers installation, the three clients, and capabilities that aren't already demonstrated by the functional guides (00 – 13). Each section is independent — jump to whichever topic you need.
+Reference documentation for the `azure-containerapps-sandbox` Python SDK. Covers installation, the three clients, and capabilities that aren't already demonstrated by the functional guides (00 – 13). Each section is independent, jump to whichever topic you need.
 
 > Verified against `azure-containerapps-sandbox 0.1.0b1`. Every snippet was executed before being pasted.
 
@@ -21,7 +21,7 @@ Reference documentation for the `azure-containerapps-sandbox` Python SDK. Covers
 ## Prerequisites
 
 - **Python ≥ 3.10**
-- The **Azure CLI** (`az`) for local development authentication — run `az login` once after install.
+- The **Azure CLI** (`az`) for local development authentication, run `az login` once after install.
   - <https://learn.microsoft.com/cli/azure/install-azure-cli>
   - On hosted compute (Azure VMs, Container Apps, CI/CD), `DefaultAzureCredential` automatically uses managed identity. No Azure CLI needed in that environment.
 - An **Azure subscription** with a resource group you can create resources in.
@@ -44,7 +44,7 @@ For one-time setup that creates a resource group and assigns RBAC, also install 
 pip install azure-mgmt-resource azure-mgmt-authorization
 ```
 
-The SDK also pulls in `azure-identity` and `azure-core` as transitive deps — you don't need to install them explicitly.
+The SDK also pulls in `azure-identity` and `azure-core` as transitive deps, you don't need to install them explicitly.
 
 ### Verify the install
 
@@ -76,7 +76,7 @@ client = SandboxGroupClient(
     sandbox_group="<GROUP_NAME>",
 )
 
-# Create a sandbox — returns a SandboxClient when it's Running
+# Create a sandbox, returns a SandboxClient when it's Running
 sb = client.begin_create_sandbox(disk="ubuntu").result()
 
 # Run a command
@@ -102,7 +102,7 @@ The SDK exposes **three** top-level clients. Reach for the right one and the res
 | `SandboxGroupClient`           | Data plane (one group) | Everything inside a group: sandboxes, disks, snapshots, volumes, secrets, public disk images. |
 | `SandboxClient`                | Data plane (one sandbox) | Exec, files, lifecycle (stop/resume), snapshot/commit, egress, ports, stats. |
 
-`SandboxGroupClient.list_sandboxes()` returns lightweight `Sandbox` dataclasses — they have `.id` and `.state`, but they are **not** `SandboxClient`s. To do anything to an existing sandbox you need an actual `SandboxClient`.
+`SandboxGroupClient.list_sandboxes()` returns lightweight `Sandbox` dataclasses, they have `.id` and `.state`, but they are **not** `SandboxClient`s. To do anything to an existing sandbox you need an actual `SandboxClient`.
 
 ### Construct each client
 
@@ -116,14 +116,14 @@ from azure.containerapps.sandbox import (
 
 credential = DefaultAzureCredential()
 
-# Control plane — manages sandbox groups (ARM)
+# Control plane, manages sandbox groups (ARM)
 mgmt = SandboxGroupManagementClient(
     credential,
     subscription_id="<SUB_ID>",
     resource_group="<RG>",
 )
 
-# Data plane for one group — everything inside the group
+# Data plane for one group, everything inside the group
 group = SandboxGroupClient(
     endpoint_for_region("eastus2"),
     credential,
@@ -135,7 +135,7 @@ group = SandboxGroupClient(
 
 ### Two ways to get a `SandboxClient`
 
-**1. From `begin_create_sandbox(...).result()`** — you get a fully wired `SandboxClient` for the new sandbox:
+**1. From `begin_create_sandbox(...).result()`**, you get a fully wired `SandboxClient` for the new sandbox:
 
 ```python
 sb = group.begin_create_sandbox(disk="ubuntu", labels={"name": "dev"}).result()
@@ -144,14 +144,14 @@ out = sb.exec("echo hello")
 print(out.stdout)
 ```
 
-**2. From `group.get_sandbox_client(id)`** — wrap an existing sandbox without re-creating it:
+**2. From `group.get_sandbox_client(id)`**, wrap an existing sandbox without re-creating it:
 
 ```python
 sb = group.get_sandbox_client("00000000-0000-0000-0000-000000000000")
 out = sb.exec("uname -a")
 ```
 
-> `get_sandbox_client` is a local wrap — it doesn't round-trip the service. Call `sb.get()` afterward if you need a fresh `Sandbox` snapshot.
+> `get_sandbox_client` is a local wrap, it doesn't round-trip the service. Call `sb.get()` afterward if you need a fresh `Sandbox` snapshot.
 
 ### `Sandbox` dataclass vs `SandboxClient`
 
@@ -184,7 +184,7 @@ sb = group.get_sandbox_client(s.id)   # ← now has .exec/.stop/.resume/etc.
 
 ## Async
 
-Every operation has an async counterpart in `azure.containerapps.sandbox.aio`. Same names and shapes — but `async`/`await`.
+Every operation has an async counterpart in `azure.containerapps.sandbox.aio`. Same names and shapes, but `async`/`await`.
 
 If you're building a web app, an agent runtime, or any service that drives many sandboxes per request, sync calls block the event loop. The `aio` surface lets a single process drive hundreds of sandboxes concurrently with proper cancellation and timeouts.
 
@@ -242,7 +242,7 @@ logging.basicConfig(stream=sys.stdout, level=logging.INFO)
 logging.getLogger("azure").setLevel(logging.DEBUG)
 ```
 
-The SDK picks up the `azure` logger hierarchy automatically. No special parameter on the client is required to *use* logging — only to control verbosity.
+The SDK picks up the `azure` logger hierarchy automatically. No special parameter on the client is required to *use* logging, only to control verbosity.
 
 ### Enable HTTP logging on a single call
 
@@ -257,7 +257,7 @@ sb = group.begin_create_sandbox(
 
 ### Redaction
 
-Azure-core's HTTP logging redacts sensitive headers (`Authorization`, `x-ms-*-key`, etc.) automatically. Body content is **not** logged by default. If you need bodies, pass `logging_body=True` on the call — but only in dev: bodies may contain secrets you set with `upsert_secret`.
+Azure-core's HTTP logging redacts sensitive headers (`Authorization`, `x-ms-*-key`, etc.) automatically. Body content is **not** logged by default. If you need bodies, pass `logging_body=True` on the call, but only in dev: bodies may contain secrets you set with `upsert_secret`.
 
 [↑ Back to top](#contents)
 
@@ -265,20 +265,20 @@ Azure-core's HTTP logging redacts sensitive headers (`Authorization`, `x-ms-*-ke
 
 ## Exceptions
 
-The SDK raises standard `azure.core.exceptions.*` types — they carry the HTTP status and an Azure error payload.
+The SDK raises standard `azure.core.exceptions.*` types, they carry the HTTP status and an Azure error payload.
 
 | Exception | When |
 |---|---|
 | `ResourceNotFoundError`                              | 404 on a GET (`get_sandbox`, `get_disk_image`, etc.) |
 | `HttpResponseError`                                  | Any other non-success status (400, 403, 409, 429, 5xx). Inspect `.status_code` and `.error.code` |
-| `azure.core.exceptions.ClientAuthenticationError`    | Credential/token issues — bubbled up from the credential |
+| `azure.core.exceptions.ClientAuthenticationError`    | Credential/token issues, bubbled up from the credential |
 
 ### Patterns
 
 ```python
 from azure.core.exceptions import HttpResponseError, ResourceNotFoundError
 
-# 1) Treat 404 as "doesn't exist" — common during idempotent cleanup
+# 1) Treat 404 as "doesn't exist", common during idempotent cleanup
 try:
     group.delete_sandbox(sb_id)
 except ResourceNotFoundError:
@@ -289,10 +289,10 @@ try:
     group.begin_create_sandbox(disk="ubuntu").result()
 except HttpResponseError as e:
     if e.status_code == 429:
-        # rate limited — back off
+        # rate limited, back off
         ...
     elif e.status_code == 409 and e.error and e.error.code == "ConflictingOperation":
-        # a previous op on this resource hasn't settled — wait + retry
+        # a previous op on this resource hasn't settled, wait + retry
         ...
     else:
         raise
@@ -313,12 +313,12 @@ Small surface, big quality-of-life. The SDK ships a few helpers and constants th
 Both live on `SandboxClient`. They look similar; they're for different jobs.
 
 ```python
-# wait_for_running — POLL until Running; returns a refreshed Sandbox dataclass.
+# wait_for_running, POLL until Running; returns a refreshed Sandbox dataclass.
 # Use after a manual `stop` or when you specifically need the polled snapshot.
 state = sb.wait_for_running(timeout=180, poll_interval=3)
 print(state.state)   # "Running"
 
-# ensure_running — no return. Idempotent. Transparently handles
+# ensure_running, no return. Idempotent. Transparently handles
 # Suspended → Running. Pre-call guard for any operation that needs a live sandbox.
 sb.ensure_running(timeout=300)
 sb.exec("echo back")
@@ -400,7 +400,7 @@ poller.wait(timeout=60)      # wait up to N seconds, then return regardless
 sandbox_client = poller.result()  # blocks for completion, returns the result
 ```
 
-> The SDK uses **custom polling algorithms** (`ResourceStatePoller`, `DeletionPoller`, `ResourceExistsPoller`) under the hood. They poll the resource's `state` field — not the standard `Azure-AsyncOperation` / `Location` headers. There is **no `.cancel()`** on the poller: once an LRO is started server-side, you wait for terminal state.
+> The SDK uses **custom polling algorithms** (`ResourceStatePoller`, `DeletionPoller`, `ResourceExistsPoller`) under the hood. They poll the resource's `state` field, not the standard `Azure-AsyncOperation` / `Location` headers. There is **no `.cancel()`** on the poller: once an LRO is started server-side, you wait for terminal state.
 
 ### Tune timeout and interval
 
@@ -409,8 +409,8 @@ Every `begin_*` method accepts two extra kwargs:
 ```python
 poller = group.begin_create_sandbox(
     disk="ubuntu",
-    polling_timeout=600,    # default 300 — fail after this many seconds
-    polling_interval=5,     # default 3   — sleep this many seconds between polls
+    polling_timeout=600,    # default 300, fail after this many seconds
+    polling_interval=5,     # default 3, sleep this many seconds between polls
 )
 sb = poller.result()
 ```
@@ -425,7 +425,7 @@ pollers = [group.begin_delete_sandbox(i) for i in ids]
 [p.result() for p in pollers]   # all deletes run concurrently server-side
 ```
 
-Same pattern works for parallel creates, snapshots, image builds — anywhere you've got a `begin_*` method and a batch of inputs.
+Same pattern works for parallel creates, snapshots, image builds, anywhere you've got a `begin_*` method and a batch of inputs.
 
 [↑ Back to top](#contents)
 
@@ -433,6 +433,6 @@ Same pattern works for parallel creates, snapshots, image builds — anywhere yo
 
 ## See also
 
-- Labs — [Jupyter notebooks](labs/) — step-through notebooks for Python SDK
-- Functional guides — [00 – 11](samples/) — runnable samples for Python SDK
+- Labs, [Jupyter notebooks](labs/), step-through notebooks for Python SDK
+- Functional guides, [00 – 11](samples/), runnable samples for Python SDK
 - Upstream [Python SDK](hhttps://pypi.org/project/azure-containerapps-sandbox/)

@@ -1,11 +1,11 @@
-# simple-anonymous — the "hello world" web app pattern
+# simple-anonymous: the "hello world" web app pattern
 
 The simplest possible shape: upload a small Node.js app into a fresh
 sandbox, start it in the background, expose port 8080 **anonymously**
 (open to the internet), and verify the response from both inside the
 sandbox and from the host machine.
 
-The page that comes back proves the sandbox is a real Linux VM — live
+The page that comes back proves the sandbox is a real Linux VM, live
 system info, live CPU/memory/process stats read from `/proc` + `os`,
 and a get-started panel for visitors to spin up their own.
 
@@ -23,44 +23,23 @@ and a get-started panel for visitors to spin up their own.
   - `GET /api/sysinfo` → uname-style: kernel, distro, CPU model, IP, …
   - `GET /api/stats` → live `loadavg`, memory, process count, uptime
   - `GET /api/processes` → top 10 by RSS, read from `/proc/[0-9]*`
-- A Python SDK and an `aca` CLI driver — same flow, two flavors.
+- A Python SDK and an `aca` CLI driver, same flow, two flavors.
 - Bounded readiness polling (no fragile `sleep N`) and JSON-shape
   assertions on every endpoint.
 - A try/finally cleanup that removes the port before deleting the sandbox.
 
 ## Prerequisites
 
-- `python/samples/.env` populated (run `python python/samples/setup/setup.py` from the repo root if you haven't yet)
+- `python/samples/.env` populated (run `uv run python/samples/setup/setup.py` from the repo root if you haven't yet)
 
 ## Run it
 
-### Python SDK
-
-**Bash (macOS / Linux)**
 ```bash
 cd python
-pip install -r requirements.txt
-python run.py
+uv run run.py
 ```
 
-**PowerShell (Windows)**
-```powershell
-cd python
-pip install -r requirements.txt
-python run.py
-```
-
-### `aca` CLI
-
-**Bash (macOS / Linux / WSL / git-bash)**
-```bash
-cd cli
-bash run.sh
-```
-
-> On Windows without bash, use the Python flavor above.
-
-Both flows read configuration from `samples/.env`. Override the disk
+Reads configuration from `samples/.env`. Override the disk
 image with `ACA_WEBAPP_DISK=...` (default: `node-22`).
 
 ## Production tips
@@ -76,7 +55,7 @@ image with `ACA_WEBAPP_DISK=...` (default: `node-22`).
   right one with `list_sandboxes(labels=...)`.
 - **Snapshots for warm starts.** Snapshot post-build
   ([guide 02](../../../guides/02-snapshots/README.md)) and resume into
-  it on each request — much faster than a cold boot.
+  it on each request, much faster than a cold boot.
 - **Auto-suspend / auto-delete.** Use `AutoSuspendPolicy`
   ([guide 05](../../../guides/05-lifecycle/README.md)) so idle sandboxes
   don't burn quota.
@@ -89,14 +68,10 @@ image with `ACA_WEBAPP_DISK=...` (default: `node-22`).
 ```
 simple-anonymous/
 ├── README.md              ← this file
-├── app/                   ← Node app (shared by python and cli)
+├── app/                   ← Node app (shared by all variants)
 │   ├── server.js
 │   └── package.json
-├── python/
-│   ├── README.md
-│   ├── requirements.txt
-│   └── run.py
-└── cli/
+└── python/
     ├── README.md
-    └── run.sh
+    └── run.py
 ```

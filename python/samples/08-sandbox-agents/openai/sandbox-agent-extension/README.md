@@ -45,8 +45,7 @@ async def main() -> None:
 ## Install (dev)
 
 ```bash
-pip install -e ".[dev]"
-pytest -q
+uv run --project . --extra dev pytest -q
 ```
 
 

@@ -1,4 +1,4 @@
-# 02 — Coding agents
+# 02: Coding agents
 
 Run **GitHub Copilot CLI** inside a fresh Azure Container Apps sandbox,
 under a deny-by-default egress policy, **without ever placing the
@@ -15,7 +15,7 @@ This is the template the `claude-code/` and `codex/` flows will follow.
 
 ## YOLO mode is now safe
 
-Coding agents ship with an auto-approval mode — `copilot --allow-all-tools`,
+Coding agents ship with an auto-approval mode, `copilot --allow-all-tools`,
 Claude Code's `--dangerously-skip-permissions`, Codex's `--full-auto`, etc.
 On a developer's laptop those flags are scary: a prompt-injection or
 misjudgment can `rm -rf`, exfiltrate `~/.aws/credentials`, or push to
@@ -55,7 +55,7 @@ zero-trust posture for autonomous agents:
 3. **Least-privilege egress.** Default action is `Deny`. Only the four
    GitHub host families Copilot needs are allowed out at all. A
    compromised agent cannot reach `attacker.com` to exfiltrate
-   *anything* — including what little context it has.
+   *anything*, including what little context it has.
 4. **Customer-controlled credential lifecycle.** The PAT enters the
    system through the customer's browser session at
    [sandboxes.azure.com](https://sandboxes.azure.com), not through a
@@ -135,7 +135,7 @@ deliberately blind to it.
 
 ## Prerequisites
 
-- The shared sandbox baseline has been provisioned —
+- The shared sandbox baseline has been provisioned,
   `python/samples/setup/setup.py` **or**
   `python/samples/setup/setup.py`.
 - A GitHub PAT with Copilot access (see below).
@@ -152,7 +152,7 @@ You need a token that can authenticate to both `api.github.com` and
   The pre-filled scopes match what `gh auth login --web` requests.
 
 Your Copilot subscription (Individual, Business, or Enterprise) must
-be active on the account that owns the token — the token only proves
+be active on the account that owns the token, the token only proves
 identity; entitlement is checked server-side by GitHub.
 
 ## How to run
@@ -161,11 +161,10 @@ identity; entitlement is checked server-side by GitHub.
 
 ```bash
 cd gh-copilot-cli/python
-pip install -r requirements.txt
-python copilot.py
+uv run copilot.py
 ```
 
-The Python flow prints the portal URL and waits — you paste the PAT
+The Python flow prints the portal URL and waits, you paste the PAT
 in the portal and run `copilot` from the portal's `bash` tab.
 
 ### CLI (bash, with optional in-terminal shell)
@@ -185,14 +184,14 @@ prefer; just press Enter without opening a shell session.)
 Both flows produce the same sandbox configuration: deny-default
 egress, four GitHub host-allows, three placeholder Transform rules.
 
-For Copilot-specific details — where to paste the PAT in the portal
+For Copilot-specific details, where to paste the PAT in the portal
 (with screenshot), what each host rule is for, PAT scope guidance, and
-the verification recipe — see [`gh-copilot-cli/README.md`](gh-copilot-cli/README.md).
+the verification recipe, see [`gh-copilot-cli/README.md`](gh-copilot-cli/README.md).
 
 ## What it composes
 
-- [guides/01-sandboxes](../../guides/01-sandboxes) — `begin_create_sandbox` + `exec`
-- [guides/08-egress](../../guides/08-egress) — `set_egress_default("Deny")`, host-allow rules, **plus Transform rules** (not covered in the egress guide)
+- [guides/01-sandboxes](../../guides/01-sandboxes), `begin_create_sandbox` + `exec`
+- [guides/08-egress](../../guides/08-egress), `set_egress_default("Deny")`, host-allow rules, **plus Transform rules** (not covered in the egress guide)
 
 ## Operational notes
 
@@ -200,7 +199,7 @@ the verification recipe — see [`gh-copilot-cli/README.md`](gh-copilot-cli/READ
   the default-allow egress policy (the sandbox needs to reach `gh.io`
   and its release hosts to bootstrap). The "no credential in the
   workload" guarantee applies after the script swaps to deny-default
-  + Transform rules — i.e. for the agent phase, which is what
+  + Transform rules, i.e. for the agent phase, which is what
   customers actually run.
 - **Footgun: `*.githubcopilot.com` host rules.** A host-allow rule for
   `*.githubcopilot.com` short-circuits the matching Transform rule and
@@ -232,8 +231,8 @@ the verification recipe — see [`gh-copilot-cli/README.md`](gh-copilot-cli/READ
 
 ## Coming soon
 
-- [`claude-code/`](claude-code) — same pattern for Anthropic Claude Code.
-- [`codex/`](codex) — same pattern for OpenAI Codex CLI.
+- [`claude-code/`](claude-code), same pattern for Anthropic Claude Code.
+- [`codex/`](codex), same pattern for OpenAI Codex CLI.
 
 Both are stub folders today. The Copilot CLI flow is the template
 they'll follow.

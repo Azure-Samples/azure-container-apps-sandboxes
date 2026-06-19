@@ -1,9 +1,9 @@
-# 08 — Sandbox agents
+# 08: Sandbox agents
 
 Wire **agent frameworks** to an Azure Container Apps sandbox as their
 execution environment. The agent loop (model calls, planning, tool
-routing) stays in your harness; tool execution — shell commands,
-file I/O, ports — lives in a fresh sandbox per session.
+routing) stays in your harness; tool execution, shell commands,
+file I/O, ports, lives in a fresh sandbox per session.
 
 This is a different shape from [`02-coding-agents`](../02-coding-agents):
 
@@ -16,7 +16,7 @@ This is a different shape from [`02-coding-agents`](../02-coding-agents):
 
 | Folder | Framework | Integration today | Status |
 |---|---|---|---|
-| [`openai/`](openai) | [OpenAI Agents SDK](https://openai.github.io/openai-agents-python/) | **First-class sandbox provider** (`agents_aca_sandboxes`) — `SandboxAgent` runs every Shell/Filesystem tool call inside an ACA microVM. Three live demos: [single-agent Deep Research](openai/01-deep-research-single), [parallel Research Swarm](openai/02-swarm-research-parallel), and [Autonomous Swarm (Harness IN Compute)](openai/03-autonomous-swarm) — the supervisor itself runs inside a sandbox and uses its Managed Identity for both AOAI and a peer worker group (zero AOAI key in any sandbox). | ✅ provider + 3 demos |
+| [`openai/`](openai) | [OpenAI Agents SDK](https://openai.github.io/openai-agents-python/) | **First-class sandbox provider** (`agents_aca_sandboxes`), `SandboxAgent` runs every Shell/Filesystem tool call inside an ACA microVM. Three live demos: [single-agent Deep Research](openai/01-deep-research-single), [parallel Research Swarm](openai/02-swarm-research-parallel), and [Autonomous Swarm (Harness IN Compute)](openai/03-autonomous-swarm), the supervisor itself runs inside a sandbox and uses its Managed Identity for both AOAI and a peer worker group (zero AOAI key in any sandbox). | ✅ provider + 3 demos |
 
 Each subfolder ships:
 
@@ -27,7 +27,7 @@ Each subfolder ships:
   [`03-autonomous-swarm/`](openai/03-autonomous-swarm) (harness-in-compute,
   zero-secret).
 - For the placeholders: a small reusable adapter module + `agent.py` +
-  `README.md` + `requirements.txt`, following the same shape as the
+  `README.md`, following the same shape as the
   realized OpenAI variant.
 
 ## The shared pattern
@@ -80,7 +80,7 @@ the same shape. The same three primitives shown here (`exec`,
   sandbox interfaces explicitly so providers are interchangeable.
 - **Deny-default egress.** Pair with
   [`guides/08-egress`](../../guides/08-egress) to lock down what the
-  agent can reach on the network — model calls leave from your
+  agent can reach on the network, model calls leave from your
   harness, so the sandbox itself can run with no outbound paths.
 - **Managed identity for tool-side Azure calls.** Pair with
   [`guides/10-identity`](../../guides/10-identity) to give
@@ -93,26 +93,23 @@ the same shape. The same three primitives shown here (`exec`,
 
 ## Prerequisites
 
-- Shared sandbox baseline provisioned —
-  `python/samples/setup/setup.py` **or**
-  `python/samples/setup/setup.py`.
+- Shared sandbox baseline provisioned with `uv run python/samples/setup/setup.py`.
 - Framework-specific model auth (OpenAI / Azure OpenAI key, or
-  Anthropic API key) — see each subfolder's README.
+  Anthropic API key), see each subfolder's README.
 
 ## How to run
 
 ```bash
 cd openai/01-deep-research-single
-pip install -r requirements.txt
-python deep_research_agent.py
+uv run --extra agents deep_research_agent.py
 ```
 
 ## What it composes
 
-- [guides/01-sandboxes](../../guides/01-sandboxes) — `begin_create_sandbox`, `exec`
-- [guides/07-files](../../guides/07-files) — `write_file` / `read_file`
-- (Optional) [guides/08-egress](../../guides/08-egress) — deny-default + host allow rules
-- (Optional) [guides/10-identity](../../guides/10-identity) — managed identity for tool-side Azure calls
+- [guides/01-sandboxes](../../guides/01-sandboxes), `begin_create_sandbox`, `exec`
+- [guides/07-files](../../guides/07-files), `write_file` / `read_file`
+- (Optional) [guides/08-egress](../../guides/08-egress), deny-default + host allow rules
+- (Optional) [guides/10-identity](../../guides/10-identity), managed identity for tool-side Azure calls
 
 ## Production tips
 
@@ -129,4 +126,4 @@ python deep_research_agent.py
 - **Don't put framework API keys in the sandbox.** The harness has
   them; the sandbox doesn't need them. The frameworks deliberately
   send only the *tool* call into the sandbox, not the model
-  credential — keep it that way.
+  credential, keep it that way.

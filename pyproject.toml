@@ -8,19 +8,23 @@ license = { text = "MIT" }
 dependencies = [
     "azure-containerapps-sandbox>=0.1.0b1",
     "azure-identity>=1.15.0",
+    "azure-mgmt-resource",
+    "azure-mgmt-authorization>=4.0.0",
 ]
 
 [project.optional-dependencies]
-setup = [
-    "azure-mgmt-resource",
-    "azure-mgmt-authorization",
-]
 openai = [
     "openai>=1.50.0",
 ]
 agents = [
     "openai-agents>=0.17.0",
     "agents-extension-aca-sandboxes",
+    "azure-mgmt-resourcegraph>=8.0.0",
+]
+connectors = [
+    "fastapi>=0.115",
+    "uvicorn[standard]>=0.30",
+    "httpx>=0.27",
 ]
 
 [tool.uv.sources]

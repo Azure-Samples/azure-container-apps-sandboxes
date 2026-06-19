@@ -1,4 +1,4 @@
-# 10-connectors-email-triage — Email → sandbox → Teams, with `azd up`
+# 10-connectors-email-triage: Email → sandbox → Teams, with `azd up`
 
 > A new Outlook email fires an **Azure Connector Gateway** trigger →
 > the gateway POSTs to an ACA receiver → the receiver boots a fresh
@@ -68,7 +68,7 @@ Where the gateway API key lives (and doesn't):
 ├── README.md                  this file
 ├── azure.yaml                 azd entrypoint (provision + deploy + post-deploy)
 ├── infra/
-│   ├── main.bicep             root template — wires the modules
+│   ├── main.bicep             root template, wires the modules
 │   ├── main.parameters.json   azd parameter file
 │   ├── modules/
 │   │   ├── connector-gateway.bicep    Microsoft.Web/connectorGateways
@@ -79,7 +79,7 @@ Where the gateway API key lives (and doesn't):
 │   │   ├── receiver.bicep             Log Analytics + ACA env + receiver Container App
 │   │   └── trigger-on-new-email.bicep .../triggerconfigs (callbackUrl=receiver/webhook)
 │   └── scripts/
-│       ├── postdeploy.sh      Linux/macOS — listApiKey + secret stamp + consent URLs
+│       ├── postdeploy.sh      Linux/macOS, listApiKey + secret stamp + consent URLs
 │       └── postdeploy.ps1     Windows
 ├── receiver/                  the trigger receiver code
 │   ├── app.py                 FastAPI; webhook → boot sandbox → run Copilot
@@ -87,9 +87,8 @@ Where the gateway API key lives (and doesn't):
 │   └── Dockerfile
 ├── prompts/
 │   └── triage.md              canonical triage prompt (receiver + local runner read this)
-└── python/                    local-dev runner — no azd needed
+└── python/                    local-dev runner, no azd needed
     ├── README.md
-    ├── requirements.txt
     ├── run.py                 boots a sandbox with a sample payload
     └── samples/sample-email.json
 ```
@@ -101,15 +100,15 @@ Where the gateway API key lives (and doesn't):
 | **Azure CLI** (`az`) | post-deploy script calls ARM data-plane ops | <https://learn.microsoft.com/cli/azure/install-azure-cli> |
 | **`az login`** completed | everything | run once after installing the CLI |
 | **Azure Developer CLI** (`azd`) | `azd up` orchestrates provision + deploy + post-deploy | <https://learn.microsoft.com/azure/developer/azure-developer-cli/install-azd> |
-| **Docker** | `azd deploy receiver` builds the receiver image | any local container runtime — Docker Desktop, Podman, etc. |
-| **Subscription with Connector Gateway preview enabled** | gateway is in preview | Build 2026 preview — confirm region availability before deploying |
+| **Docker** | `azd deploy receiver` builds the receiver image | any local container runtime, Docker Desktop, Podman, etc. |
+| **Subscription with Connector Gateway preview enabled** | gateway is in preview | Build 2026 preview, confirm region availability before deploying |
 | **ACA sandbox group preview** | sandboxes pillar | the rest of `samples/sandboxes/` already requires this |
 | **An M365 mailbox + a Teams team you can post to** | OAuth consent during post-deploy | personal dev tenant is fine |
 
 ## Cloud-deployed quickstart (`azd up`)
 
 ```bash
-cd samples/sandboxes/scenarios/10-connectors-email-triage
+cd python/samples/10-connectors-email-triage
 
 azd auth login            # one-time, if you haven't already
 azd env new email-triage  # any short name
@@ -119,7 +118,7 @@ azd env set ACA_SANDBOX_REGION westus2   # any region where sandboxes are availa
 azd up
 ```
 
-The post-deploy hook runs **interactively** — it prints two OAuth
+The post-deploy hook runs **interactively**, it prints two OAuth
 consent URLs (Office 365 and Teams) and waits for you to open them in
 a browser. Sign in with the M365 account whose mailbox + Teams channel
 you want the flow to use. After both connections show
@@ -153,27 +152,26 @@ MCP endpoint you give it. Useful for iterating on
 
 ```bash
 cd python
-pip install -r requirements.txt
 
 # Reuse the cloud deployment's values (run after at least one `azd up`):
 export $(azd env get-values | grep -E '^(CONNECTOR_GATEWAY_ID|TEAMS_MCP_SERVER_CONFIG_NAME|CONNECTOR_GATEWAY_API_KEY)=' | xargs)
 
-python run.py --dry-run    # render the prompt + print the egress plan
-python run.py              # actually boot the sandbox and run Copilot
+uv run --extra connectors run.py --dry-run    # render the prompt + print the egress plan
+uv run --extra connectors run.py              # actually boot the sandbox and run Copilot
 ```
 
 See [`python/README.md`](python/README.md) for full options.
 
 ## What it composes
 
-- [`02-coding-agents/gh-copilot-cli`](../02-coding-agents/gh-copilot-cli)
-  — Copilot CLI + egress-proxy credential mediation.
-- [`guides/08-egress`](../../guides/08-egress) — `set_egress_default("Deny")`,
+- [`02-coding-agents/gh-copilot-cli`](../02-coding-agents/gh-copilot-cli),
+  Copilot CLI + egress-proxy credential mediation.
+- [`guides/08-egress`](../../guides/08-egress), `set_egress_default("Deny")`,
   host-allow rules, **plus** Transform rules.
-- [`guides/01-sandboxes`](../../guides/01-sandboxes) — boot + exec.
-- [`guides/07-files`](../../guides/07-files) — `write_file` for the
+- [`guides/01-sandboxes`](../../guides/01-sandboxes), boot + exec.
+- [`guides/07-files`](../../guides/07-files), `write_file` for the
   prompt + the MCP server config.
-- [`guides/10-identity`](../../guides/10-identity) — Connector Gateway
+- [`guides/10-identity`](../../guides/10-identity), Connector Gateway
   uses a SystemAssigned MI; the receiver uses a UserAssigned MI to
   call the SandboxGroup data plane.
 
@@ -186,7 +184,7 @@ See [`python/README.md`](python/README.md) for full options.
   the Container App (`Microsoft.App/containerApps/authConfigs`),
   validate Entra tokens, and only allow the **Connector Gateway's
   managed identity principalId** through. The reference Functions
-  sample uses this pattern — same shape applies here.
+  sample uses this pattern, same shape applies here.
 - **Scope the gateway API key to one MCP server config**. The
   post-deploy script does this (`scope: $TEAMS_MCP_SERVER_CONFIG_NAME`).
   A compromised receiver can still post to Teams, but it can't reach
@@ -197,7 +195,7 @@ See [`python/README.md`](python/README.md) for full options.
   disk ([`guides/03-disks`](../../guides/03-disks)) and per-email cold
   start drops to seconds.
 - **Snapshot the egress-policy-configured state**, not just the
-  installed binaries — the Transform rule survives the snapshot and
+  installed binaries, the Transform rule survives the snapshot and
   every boot inherits the same lockdown.
 - **Label sandboxes by message-id**. Pair with
   [`guides/11-labels`](../../guides/11-labels) so a janitor can
@@ -220,14 +218,11 @@ See [`python/README.md`](python/README.md) for full options.
   warnings because the type schema isn't cached. Resources still
   deploy correctly. Expect breaking changes between preview milestones.
 - **OAuth consent is interactive.** The post-deploy hook can't
-  finish the OAuth dance for you — you open the URLs, sign in, return.
+  finish the OAuth dance for you, you open the URLs, sign in, return.
   Once consented, the connection survives across re-runs.
 - **Single-tenant.** Both connections are owned by whoever consented.
   Multi-tenant requires using `connections/accessPolicies` and
-  per-tenant gateway secrets — out of scope here.
-- **No CLI flavor (`aca` CLI script) of this scenario.** The
-  Connector Gateway ops aren't (yet) wrapped by `aca sandboxgroup ...` —
-  use `az rest` or the `azd` flow above.
+  per-tenant gateway secrets, out of scope here.
 
 ## Tear down
 

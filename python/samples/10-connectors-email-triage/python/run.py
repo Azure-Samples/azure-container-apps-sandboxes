@@ -20,9 +20,8 @@ runs that for you and prints the value).
 Usage::
 
     cd python
-    pip install -r requirements.txt
-    python run.py --email samples/sample-email.json
-    python run.py --email path/to/your-email.json --dry-run
+    uv run --extra connectors run.py --email samples/sample-email.json
+    uv run --extra connectors run.py --email path/to/your-email.json --dry-run
 
 ``--dry-run`` skips the actual ``copilot`` invocation and just prints
 the prompt + the egress policy it would apply — useful for iterating
