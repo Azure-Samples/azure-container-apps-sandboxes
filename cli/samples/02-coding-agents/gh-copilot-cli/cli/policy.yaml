@@ -1,4 +1,4 @@
-# ACA egress policy — Copilot CLI scenario (portal-paste flow).
+# ACA egress policy, Copilot CLI scenario (portal-paste flow).
 #
 # Header values contain the literal placeholder "PASTE_PAT_HERE" instead
 # of a real PAT. After this policy is applied, open the sandbox in
@@ -6,11 +6,17 @@
 # "PASTE_PAT_HERE" in each Transform rule's Value with your GitHub PAT.
 # The scheme prefix (Bearer / token) must stay.
 #
-# IMPORTANT: do NOT add a hostRule for *.githubcopilot.com — host rules
+# IMPORTANT: do NOT add a hostRule for *.githubcopilot.com, host rules
 # short-circuit before transform rules fire, which would silently drop
 # the injected Authorization header.
 
 defaultAction: Deny
+
+# Transform rules rewrite request headers (the Authorization injection
+# below), which requires full traffic inspection so the proxy can read
+# and modify the request. Without this, Set-header transforms do not
+# fire and the injected PAT never reaches the upstream.
+trafficInspection: Full
 
 hostRules:
   - pattern: "*.github.com"

@@ -1,13 +1,13 @@
 #!/usr/bin/env bash
-# Sandbox inception swarm — aca CLI variant.
+# Sandbox inception swarm, aca CLI variant.
 #
 # Story: a sandbox in orchestrator group A uses its group's
 # system-assigned managed identity to create and drive N worker
-# sandboxes in a separate group B — no credential is ever placed
+# sandboxes in a separate group B, no credential is ever placed
 # inside the agent. Demonstration task: Monte Carlo Pi across the
 # workers, aggregated by the orchestrator.
 #
-# The script is built so `aca config` is the obvious win — neither the
+# The script is built so `aca config` is the obvious win, neither the
 # host nor the orchestrator carries `--subscription / --resource-group /
 # --group / --managed-identity` flags on individual `aca` calls.
 #
@@ -33,12 +33,12 @@ if [[ -f "$dir/.env" ]]; then
     . "$dir/.env"
     set +a
 else
-    echo "error: could not find samples/.env — run setup/cli/setup.sh first" >&2
+    echo "error: could not find samples/.env, run setup/cli/setup.sh first" >&2
     exit 1
 fi
 
 ROLE_NAME="Container Apps SandboxGroup Data Owner"
-CLI_INSTALL_URL="https://raw.githubusercontent.com/microsoft/azure-container-apps/main/docs/early/aca-cli/install.sh"
+CLI_INSTALL_URL="https://aka.ms/aca-cli-install"
 WORKERS=4
 DARTS_PER_WORKER=1000000
 SUFFIX="$(printf '%08x' "$(( (RANDOM<<15) ^ RANDOM ^ ($(date +%s) & 0xffff) ))")"
@@ -75,13 +75,13 @@ aca sandboxgroup create \
 # needing --group on each line. This is the aca config showcase.
 aca config sandbox set --group "$ORCH_GROUP" --region "$ACA_SANDBOXGROUP_REGION" >/dev/null
 
-aca sandboxgroup identity assign --name "$ORCH_GROUP" --system-assigned >/dev/null
+aca sandboxgroup identity assign --group "$ORCH_GROUP" --system-assigned >/dev/null
 
-PRINCIPAL_ID="$(aca sandboxgroup identity show --name "$ORCH_GROUP" -o json \
+PRINCIPAL_ID="$(aca sandboxgroup identity show --group "$ORCH_GROUP" -o json \
     | grep -oE '"principalId"[^"]*"[0-9a-fA-F-]+"' \
     | grep -oE '[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}')"
 if [[ -z "$PRINCIPAL_ID" ]]; then
-    echo "error: orchestrator group has no principalId — MI not enabled?" >&2
+    echo "error: orchestrator group has no principalId, MI not enabled?" >&2
     exit 1
 fi
 echo "    principalId: $PRINCIPAL_ID"
@@ -102,7 +102,7 @@ for attempt in 1 2 3 4 5 6 7 8 9 10; do
     if aca sandboxgroup role create \
             --role "$ROLE_NAME" \
             --principal-id "$PRINCIPAL_ID" \
-            --name "$WORKER_GROUP" 2>/tmp/role.err; then
+            --group "$WORKER_GROUP" 2>/tmp/role.err; then
         break
     fi
     if grep -q "RoleAssignmentExists\|already exists" /tmp/role.err 2>/dev/null; then
@@ -118,6 +118,30 @@ for attempt in 1 2 3 4 5 6 7 8 9 10; do
     sleep 10
 done
 rm -f /tmp/role.err
+
+# The host created the orchestrator group fresh, so it has no data-plane
+# grant there yet (setup only grants on the samples group). Grant the host
+# Data Owner on the orchestrator group so it can boot the orchestrator
+# sandbox below.
+HOST_ID="$(az ad signed-in-user show --query id -o tsv 2>/dev/null)"
+if [[ -z "$HOST_ID" ]]; then
+    echo "error: could not resolve signed-in user id (run 'az login')" >&2
+    exit 1
+fi
+echo "==> Granting '$ROLE_NAME' on $ORCH_GROUP -> host user..."
+if ! aca sandboxgroup role create \
+        --role "$ROLE_NAME" \
+        --principal-id "$HOST_ID" \
+        --group "$ORCH_GROUP" 2>/tmp/hostrole.err; then
+    if grep -q "RoleAssignmentExists\|already exists" /tmp/hostrole.err 2>/dev/null; then
+        echo "    host role already assigned"
+    else
+        cat /tmp/hostrole.err >&2
+        echo "error: host role grant on $ORCH_GROUP failed" >&2
+        exit 1
+    fi
+fi
+rm -f /tmp/hostrole.err
 
 echo "==> Waiting 20s for RBAC propagation..."
 sleep 20
@@ -147,7 +171,7 @@ cat > "$SWARM_SH" <<'INNER_EOF'
 #!/usr/bin/env bash
 # Runs INSIDE the orchestrator sandbox. Uses the group's MI (via
 # ACA_SANDBOX_MANAGED_IDENTITY=system) to fan out N worker sandbox
-# creates + execs in the WORKER group — same `aca` binary, but the
+# creates + execs in the WORKER group, same `aca` binary, but the
 # context env vars point at the worker group rather than the
 # orchestrator group. The block below is the aca config showcase: every
 # `aca` call below is parameter-free because the context is already set.
@@ -232,7 +256,7 @@ while read -r line; do
 done <<< "$SWARM_OUTPUT"
 
 if [[ "$TOTAL_DARTS" -eq 0 ]]; then
-    echo "error: no worker results parsed — see output above" >&2
+    echo "error: no worker results parsed, see output above" >&2
     exit 1
 fi
 PI=$(awk "BEGIN{pi=4*$TOTAL_INSIDE/$TOTAL_DARTS; err=pi-3.141592653589793; if(err<0)err=-err; printf \"pi ≈ %.6f  (error %.2e)\", pi, err}")

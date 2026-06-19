@@ -1,10 +1,10 @@
-"""Sandbox inception swarm — orchestrator sandbox spawns N workers in another group.
+"""Sandbox inception swarm, orchestrator sandbox spawns N workers in another group.
 
 The host script provisions two fresh per-run sandbox groups (orchestrator
 with SystemAssigned managed identity, plus a worker group with `Data
 Owner` granted to the orchestrator's MI), boots an orchestrator
 sandbox in the orchestrator group, then asks it to fan out N=4 Monte
-Carlo Pi workers in the worker group **using only managed identity** —
+Carlo Pi workers in the worker group **using only managed identity**,
 no credential is ever materialised inside the agent code.
 
 The full scenario story (architecture diagram + production tips) lives
@@ -19,6 +19,7 @@ from __future__ import annotations
 import asyncio
 import json
 import os
+import subprocess
 import sys
 import textwrap
 import time
@@ -152,7 +153,12 @@ def _load_env() -> None:
         )
 
 
-def _assign_role(auth: AuthorizationManagementClient, scope: str, principal_id: str) -> None:
+def _assign_role(
+    auth: AuthorizationManagementClient,
+    scope: str,
+    principal_id: str,
+    principal_type: str = "ServicePrincipal",
+) -> None:
     role_def = next(
         auth.role_definitions.list(scope, filter=f"roleName eq '{ROLE_NAME}'"),
         None,
@@ -166,7 +172,7 @@ def _assign_role(auth: AuthorizationManagementClient, scope: str, principal_id: 
             {
                 "role_definition_id": role_def.id,
                 "principal_id": principal_id,
-                "principal_type": "ServicePrincipal",
+                "principal_type": principal_type,
             },
         )
         print(f"    granted to principal {principal_id}")
@@ -175,6 +181,26 @@ def _assign_role(auth: AuthorizationManagementClient, scope: str, principal_id: 
             print("    role already assigned (skipping)")
         else:
             raise
+
+
+def _resolve_host_principal() -> tuple[str, str]:
+    """Principal that boots the orchestrator sandbox (the host running this).
+
+    Interactive default: the signed-in az CLI user. For automation without
+    a signed-in user, set ACA_PRINCIPAL_ID, and optionally ACA_PRINCIPAL_TYPE
+    (defaults to ServicePrincipal).
+    """
+    override = os.environ.get("ACA_PRINCIPAL_ID")
+    if override:
+        return override, os.environ.get("ACA_PRINCIPAL_TYPE", "ServicePrincipal")
+    result = subprocess.run(
+        ["az", "ad", "signed-in-user", "show", "--query", "id", "-o", "tsv"],
+        capture_output=True,
+        text=True,
+    )
+    if result.returncode != 0:
+        sys.exit(f"error: could not resolve signed-in user: {result.stderr.strip()}")
+    return result.stdout.strip(), "User"
 
 
 def main() -> None:
@@ -210,20 +236,32 @@ def main() -> None:
             time.sleep(2)
             principal_id = (mgmt.get_group(orch_group).identity or {}).get("principalId")
         if not principal_id:
-            sys.exit("error: orchestrator group has no principalId — MI not enabled?")
+            sys.exit("error: orchestrator group has no principalId, MI not enabled?")
         print(f"    principalId: {principal_id}")
 
         # ---- 2. Worker group ----------------------------------------------
         print(f"==> Provisioning worker group {worker_group!r}...")
         mgmt.begin_create_group(worker_group, region).result()
 
-        # ---- 3. Grant Data Owner on worker-group scope only ---------------
+        # ---- 3. Grant Data Owner: MI on worker group, host on orchestrator group
         print(f"==> Granting {ROLE_NAME!r} on worker group → orchestrator MI...")
         worker_scope = (
             f"/subscriptions/{subscription}/resourceGroups/{resource_group}"
             f"/providers/Microsoft.App/sandboxGroups/{worker_group}"
         )
         _assign_role(auth, worker_scope, principal_id)
+
+        # The host created the orchestrator group fresh, so it has no
+        # data-plane grant there yet (setup only grants on the samples
+        # group). Grant the host Data Owner on the orchestrator group so it
+        # can boot the orchestrator sandbox below.
+        host_id, host_type = _resolve_host_principal()
+        print(f"==> Granting {ROLE_NAME!r} on orchestrator group → host {host_type.lower()}...")
+        orch_scope = (
+            f"/subscriptions/{subscription}/resourceGroups/{resource_group}"
+            f"/providers/Microsoft.App/sandboxGroups/{orch_group}"
+        )
+        _assign_role(auth, orch_scope, host_id, host_type)
 
         print(f"==> Waiting {RBAC_PROPAGATION_SECONDS}s for RBAC propagation...")
         time.sleep(RBAC_PROPAGATION_SECONDS)
@@ -281,7 +319,7 @@ def main() -> None:
 
         for r in payload:
             print(
-                f"    worker {r['worker']}: {r['elapsed_s']}s — "
+                f"    worker {r['worker']}: {r['elapsed_s']}s, "
                 f"{r['inside']:,} / {r['total']:,} inside"
             )
         total_inside = sum(r["inside"] for r in payload)

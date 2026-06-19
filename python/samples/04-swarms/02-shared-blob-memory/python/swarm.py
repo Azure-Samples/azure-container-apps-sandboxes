@@ -1,4 +1,4 @@
-"""Swarm with shared-blob memory — sandbox inception + a sandbox-group AzureBlob volume.
+"""Swarm with shared-blob memory, sandbox inception + a sandbox-group AzureBlob volume.
 
 Same cross-group inception shape as
 ``../../01-sandbox-inception/python/swarm.py``: a host script provisions
@@ -17,11 +17,11 @@ worker group, mounts the same volume read-only, lists the prefix,
 reads every blob, and prints a single ``RESULT={json}`` line. This
 demonstrates three things that are otherwise hard to show:
 
-1. **Durable shared scratchpad** — the volume survives the workers
+1. **Durable shared scratchpad**, the volume survives the workers
    that wrote to it.
-2. **Cross-worker visibility without RPC** — siblings see each
+2. **Cross-worker visibility without RPC**, siblings see each
    other's partial state by listing a prefix.
-3. **Zero blob plumbing** — no storage account, no
+3. **Zero blob plumbing**, no storage account, no
    ``azure-storage-blob`` in the agent code, no RBAC on storage,
    no SAS / connection strings. Just ``open()``.
 
@@ -36,6 +36,7 @@ from __future__ import annotations
 
 import json
 import os
+import subprocess
 import sys
 import textwrap
 import time
@@ -99,8 +100,8 @@ SPAWN_WORKERS_SCRIPT = textwrap.dedent('''\
     DARTS        = int(os.environ["DARTS_PER_WORKER"])
     CHECKPOINT   = int(os.environ["CHECKPOINT_EVERY"])
 
-    # Per-worker script — runs inside the worker sandbox. Uses plain
-    # `open()` against the mounted shared volume — no blob SDK, no auth.
+    # Per-worker script, runs inside the worker sandbox. Uses plain
+    # `open()` against the mounted shared volume, no blob SDK, no auth.
     WORKER_PY = textwrap.dedent("""\\
         import json, os, random, sys
 
@@ -136,7 +137,7 @@ SPAWN_WORKERS_SCRIPT = textwrap.dedent('''\
         print(f"DONE worker={i} inside={inside} total={total} ckpts={len(checkpoints)}")
     """).strip()
 
-    # Aggregator script — runs inside the final aggregator sandbox AFTER
+    # Aggregator script, runs inside the final aggregator sandbox AFTER
     # the workers are deleted. Just lists the shared prefix and reads.
     AGGREGATOR_PY = textwrap.dedent("""\\
         import glob, json, os
@@ -169,7 +170,7 @@ SPAWN_WORKERS_SCRIPT = textwrap.dedent('''\
                 return f"FAIL worker={i} exit={result.exit_code} stderr={result.stderr[:400]}"
             return (result.stdout or "").strip().splitlines()[-1]
         finally:
-            # Worker sandbox is gone — but its scratchpad blob stays in the
+            # Worker sandbox is gone, but its scratchpad blob stays in the
             # shared volume. That's the whole point of this variant.
             await sandbox.delete()
 
@@ -245,7 +246,12 @@ def _load_env() -> None:
         )
 
 
-def _assign_role(auth: AuthorizationManagementClient, scope: str, principal_id: str) -> None:
+def _assign_role(
+    auth: AuthorizationManagementClient,
+    scope: str,
+    principal_id: str,
+    principal_type: str = "ServicePrincipal",
+) -> None:
     role_def = next(
         auth.role_definitions.list(scope, filter=f"roleName eq '{ROLE_NAME}'"),
         None,
@@ -261,7 +267,7 @@ def _assign_role(auth: AuthorizationManagementClient, scope: str, principal_id: 
                 {
                     "role_definition_id": role_def.id,
                     "principal_id": principal_id,
-                    "principal_type": "ServicePrincipal",
+                    "principal_type": principal_type,
                 },
             )
             return
@@ -277,6 +283,26 @@ def _assign_role(auth: AuthorizationManagementClient, scope: str, principal_id: 
     raise RuntimeError(f"role grant never succeeded: {last_exc}")
 
 
+def _resolve_host_principal() -> tuple[str, str]:
+    """Principal that boots the orchestrator sandbox (the host running this).
+
+    Interactive default: the signed-in az CLI user. For automation without
+    a signed-in user, set ACA_PRINCIPAL_ID, and optionally ACA_PRINCIPAL_TYPE
+    (defaults to ServicePrincipal).
+    """
+    override = os.environ.get("ACA_PRINCIPAL_ID")
+    if override:
+        return override, os.environ.get("ACA_PRINCIPAL_TYPE", "ServicePrincipal")
+    result = subprocess.run(
+        ["az", "ad", "signed-in-user", "show", "--query", "id", "-o", "tsv"],
+        capture_output=True,
+        text=True,
+    )
+    if result.returncode != 0:
+        sys.exit(f"error: could not resolve signed-in user: {result.stderr.strip()}")
+    return result.stdout.strip(), "User"
+
+
 def _wait_for_principal(mgmt: SandboxGroupManagementClient, group: str) -> str:
     for _ in range(10):
         identity = mgmt.get_group(group).identity or {}
@@ -284,7 +310,7 @@ def _wait_for_principal(mgmt: SandboxGroupManagementClient, group: str) -> str:
         if pid:
             return pid
         time.sleep(2)
-    sys.exit(f"error: group {group!r} has no principalId — MI not enabled?")
+    sys.exit(f"error: group {group!r} has no principalId, MI not enabled?")
 
 
 def main() -> None:
@@ -328,6 +354,19 @@ def main() -> None:
         )
         print(f"==> Granting {ROLE_NAME!r} on worker group → orchestrator MI...")
         _assign_role(auth, worker_group_scope, orch_pid)
+
+        # The host created the orchestrator group fresh, so it has no
+        # data-plane grant there yet (setup only grants on the samples
+        # group). Grant the host Data Owner on the orchestrator group so it
+        # can boot the orchestrator sandbox below.
+        host_id, host_type = _resolve_host_principal()
+        orch_group_scope = (
+            f"/subscriptions/{subscription}/resourceGroups/{resource_group}"
+            f"/providers/Microsoft.App/sandboxGroups/{orch_group}"
+        )
+        print(f"==> Granting {ROLE_NAME!r} on orchestrator group → host {host_type.lower()}...")
+        _assign_role(auth, orch_group_scope, host_id, host_type)
+
         print(f"==> Waiting {RBAC_PROPAGATION_SECONDS}s for RBAC propagation...")
         time.sleep(RBAC_PROPAGATION_SECONDS)
 
