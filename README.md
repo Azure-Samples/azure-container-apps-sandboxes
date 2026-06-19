@@ -30,7 +30,7 @@ uv run run.py
 
 A sandbox boots, a Node.js app starts, and a public URL is printed. Open it in a browser to see a live system-stats page served from inside the sandbox. From here, pick any sample below.
 
-> **Legacy pip users:** Each sample folder has a `requirements.txt` you can install with `pip install -r requirements.txt` instead.
+> **Prefer pip?** Each sample folder has a `requirements.txt` you can install with `pip install -r requirements.txt` instead.
 
 ## Create and manage sandboxes
 
