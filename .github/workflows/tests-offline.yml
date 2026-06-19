@@ -1,0 +1,30 @@
+name: tests-offline
+
+# Fast offline gate: compiles every sample, imports the SDK and the editable
+# extension, and checks the tree-level conformance rules. No Azure, no secrets.
+# This is the required status check on main. The job name (offline-tests) is
+# the check context, so do not rename it without updating the branch ruleset.
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  offline-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+
+      - name: Sync dependencies
+        run: uv sync --all-extras --group test
+
+      - name: Run offline test gate
+        run: uv run pytest tests

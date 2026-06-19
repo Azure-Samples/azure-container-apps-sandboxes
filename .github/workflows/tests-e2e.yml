@@ -1,0 +1,73 @@
+name: tests-e2e
+
+# Real Azure end-to-end runs. These provision live sandboxes, so they cost
+# money and need Azure credentials. They never run on pull_request or push.
+# Trigger them by hand from the Actions tab (Run workflow) after a risky
+# change, for example edits to setup.py, swarm provisioning, or egress policy.
+#
+# Setup required before the first run (one time):
+#   1. Create an Azure service principal (or user-assigned managed identity)
+#      with a federated credential for this repo, so login uses OIDC and no
+#      password is stored.
+#   2. Grant it rights to create the resource group and to assign the
+#      "Container Apps SandboxGroup Data Owner" role (see python/samples/setup).
+#   3. Add three repo secrets: AZURE_CLIENT_ID, AZURE_TENANT_ID,
+#      AZURE_SUBSCRIPTION_ID.
+# Until those secrets exist the Azure login step fails fast, which is the
+# expected state for a fork or an unconfigured repo.
+
+on:
+  workflow_dispatch:
+    inputs:
+      region:
+        description: Azure region to provision the sample sandbox group in
+        type: string
+        default: eastus2
+      cleanup:
+        description: Delete the provisioned resource group when the run finishes
+        type: boolean
+        default: true
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  e2e-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+
+      - name: Sync dependencies
+        run: uv sync --all-extras --group test
+
+      - name: Azure login (OIDC)
+        uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Provision sample sandbox group
+        run: uv run python/samples/setup/setup.py --region "${{ inputs.region }}"
+
+      - name: Run e2e suite
+        env:
+          RUN_E2E: "1"
+        run: uv run pytest tests/e2e -v
+
+      - name: Tear down resource group
+        if: ${{ always() && inputs.cleanup }}
+        run: |
+          echo "Deleting resource group aca-sandboxes-samples-rg..."
+          az group delete --name aca-sandboxes-samples-rg --yes
+          if [ "$(az group exists --name aca-sandboxes-samples-rg)" = "true" ]; then
+            echo "Resource group still present after delete" >&2
+            exit 1
+          fi
+          echo "Cleanup confirmed: resource group deleted, no sandboxes or meters running."

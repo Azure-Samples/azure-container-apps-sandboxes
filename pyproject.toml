@@ -29,3 +29,16 @@ connectors = [
 
 [tool.uv.sources]
 agents-extension-aca-sandboxes = { path = "python/samples/08-sandbox-agents/openai/sandbox-agent-extension", editable = true }
+
+[dependency-groups]
+test = [
+    "pytest>=8",
+    "pyyaml>=6",
+]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+markers = [
+    "e2e: real Azure end-to-end run, skipped unless RUN_E2E=1",
+]
+addopts = "-m 'not e2e'"
