@@ -1,0 +1,10 @@
+# OpenAI Agents SDK
+openai-agents>=0.17.0
+openai>=1.50.0
+
+# Azure
+azure-identity>=1.15
+azure-containerapps-sandbox==0.1.0b1
+
+# Our provider package (editable install from the sibling sandbox-agent-extension/ dir)
+-e ../sandbox-agent-extension

@@ -1,0 +1,10 @@
+fastapi>=0.115
+uvicorn[standard]>=0.30
+httpx>=0.27
+
+# Azure plumbing the receiver actually uses.
+azure-identity>=1.15
+# Sandbox SDK — published on PyPI. Pin the same version the rest of the
+# repo uses so the receiver image and the local-dev `python/` runner
+# always boot sandboxes against the same SDK shape.
+azure-containerapps-sandbox==0.1.0b1

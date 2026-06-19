@@ -1,0 +1,54 @@
+# ACA egress policy — Copilot CLI scenario (portal-paste flow).
+#
+# Header values contain the literal placeholder "PASTE_PAT_HERE" instead
+# of a real PAT. After this policy is applied, open the sandbox in
+# https://sandboxes.azure.com, navigate to Egress Policy, and replace
+# "PASTE_PAT_HERE" in each Transform rule's Value with your GitHub PAT.
+# The scheme prefix (Bearer / token) must stay.
+#
+# IMPORTANT: do NOT add a hostRule for *.githubcopilot.com — host rules
+# short-circuit before transform rules fire, which would silently drop
+# the injected Authorization header.
+
+defaultAction: Deny
+
+hostRules:
+  - pattern: "*.github.com"
+    action: Allow
+  - pattern: "*.githubusercontent.com"
+    action: Allow
+  - pattern: "gh.io"
+    action: Allow
+  - pattern: "*.github.io"
+    action: Allow
+
+rules:
+  - name: github-api-auth
+    match:
+      host: "api.github.com"
+    action:
+      type: Transform
+      headers:
+        - operation: Set
+          name: Authorization
+          value: "token PASTE_PAT_HERE"
+
+  - name: copilot-enterprise-auth
+    match:
+      host: "api.enterprise.githubcopilot.com"
+    action:
+      type: Transform
+      headers:
+        - operation: Set
+          name: Authorization
+          value: "Bearer PASTE_PAT_HERE"
+
+  - name: copilot-telemetry-auth
+    match:
+      host: "telemetry.enterprise.githubcopilot.com"
+    action:
+      type: Transform
+      headers:
+        - operation: Set
+          name: Authorization
+          value: "Bearer PASTE_PAT_HERE"

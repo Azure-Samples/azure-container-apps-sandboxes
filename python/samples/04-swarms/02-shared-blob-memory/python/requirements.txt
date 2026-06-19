@@ -1,0 +1,2 @@
+# Walks up 5 levels (python -> 02-shared-blob-memory -> 04-swarms -> scenarios -> sandboxes -> samples)
+-r ../../../../../requirements.txt

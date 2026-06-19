@@ -1,0 +1,4 @@
+# Shell scripts MUST use LF line endings or bash errors with
+# "$'\r': command not found". Git for Windows defaults to CRLF on
+# checkout otherwise.
+*.sh text eol=lf

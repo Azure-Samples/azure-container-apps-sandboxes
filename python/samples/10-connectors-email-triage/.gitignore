@@ -1,0 +1,7 @@
+# Azure Developer CLI state — auto-generated, never commit.
+.azure/
+
+# Local Python venv if anyone creates one for the receiver / python/ runners.
+.venv/
+__pycache__/
+*.pyc

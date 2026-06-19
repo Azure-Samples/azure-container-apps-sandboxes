@@ -1,0 +1,7 @@
+{
+  "subject": "Production payment processor returning 503 since 14:02 UTC",
+  "from": "oncall@example.com",
+  "bodyPreview": "Folks — paging the team. Stripe-backed checkout has been returning 503 since 14:02 UTC. Error rate is 6% of attempts. Customer-facing. I'm starting an incident; please join the bridge: https://teams.microsoft.com/l/meetup-join/... and pick up an investigation lane. Will keep posting in #payments-incidents.",
+  "importance": "Normal",
+  "id": "AAMkAGI2THKxAA="
+}

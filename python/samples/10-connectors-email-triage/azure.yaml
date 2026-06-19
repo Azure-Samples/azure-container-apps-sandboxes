@@ -1,0 +1,36 @@
+# Azure Developer CLI project for sandboxes-connectors-email-triage.
+#
+# `azd up` from this directory provisions everything (`infra/main.bicep`),
+# builds the `receiver/` container, deploys it to Azure Container Apps,
+# then runs the post-deploy script that:
+#
+#   1. fetches the Connector Gateway API key (listapikey)
+#   2. stamps it onto the sandbox-group egress policy as a Transform rule
+#      (so the API key never enters the sandbox)
+#   3. prints OAuth consent URLs for the Office 365 + Teams connections
+#      (the user opens each link once; the connection is then live)
+#   4. registers the "When a new email arrives" trigger config pointed at
+#      the receiver Container App's public URL
+
+name: sandboxes-connectors-email-triage
+metadata:
+  template: sandboxes-connectors-email-triage@0.1.0-beta
+
+services:
+  receiver:
+    project: ./receiver
+    host: containerapp
+    language: python
+    docker:
+      path: Dockerfile
+
+hooks:
+  postdeploy:
+    posix:
+      shell: sh
+      run: ./infra/scripts/postdeploy.sh
+      interactive: true
+    windows:
+      shell: pwsh
+      run: ./infra/scripts/postdeploy.ps1
+      interactive: true

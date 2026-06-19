@@ -1,0 +1,14 @@
+sandbox-agent-extension/build/
+sandbox-agent-extension/dist/
+sandbox-agent-extension/*.egg-info/
+sandbox-agent-extension/src/agents/extensions/sandbox/aca_sandboxes/__pycache__/
+sandbox-agent-extension/tests/__pycache__/
+
+# Demo outputs
+*/.run-output/
+*/.memory_state/
+**/final-answer.md
+
+# Environment files (NEVER commit credentials)
+**/.env
+!**/.env.example

@@ -1,0 +1,43 @@
+# Azure Developer CLI project for sandboxes-connectors-document-automation.
+#
+# Unlike scenario 10, there is NO ACA receiver, NO Container Registry,
+# NO Dockerfile, NO `azd deploy` step. The Connector Namespace's trigger
+# calls the sandbox directly via the ACA Dev Compute proxy — the
+# sandbox IS the webhook target.
+#
+# `azd up` from this directory:
+#
+#   1. provisions the namespace, the SharePoint connection, the
+#      SharePoint MCP server config, the sandbox group, and the RBAC
+#      grant from namespace MI -> sandbox group (`infra/main.bicep`)
+#   2. runs the post-deploy script that:
+#      a. creates the host sandbox in the sandbox group
+#      b. uploads the listener code + bootstrap.sh into the sandbox
+#      c. runs bootstrap.sh (installs poppler/tesseract/copilot,
+#         starts uvicorn on :8080 as a long-lived process)
+#      d. registers port 8080 with the ADC proxy + restricts callers
+#         via Entra to the namespace MI's principalId
+#      e. creates the trigger config pointing the namespace at
+#         https://<sbxId>--8080.<region>.adcproxy.io
+#      f. runs OAuth consent for the SharePoint connection
+#
+# After `azd up` finishes, drop an invoice PDF in the configured
+# SharePoint folder and the sandbox processes it end-to-end.
+
+name: sandboxes-connectors-document-automation
+metadata:
+  template: sandboxes-connectors-document-automation@0.1.0-beta
+
+# NOTE: no `services:` block. There's no container image to build
+# and no Container App to deploy. All compute lives in the sandbox.
+
+hooks:
+  postdeploy:
+    posix:
+      shell: sh
+      run: ./infra/scripts/postdeploy.sh
+      interactive: true
+    windows:
+      shell: pwsh
+      run: ./infra/scripts/postdeploy.ps1
+      interactive: true

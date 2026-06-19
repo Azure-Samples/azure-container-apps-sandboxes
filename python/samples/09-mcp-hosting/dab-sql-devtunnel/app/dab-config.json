@@ -1,0 +1,138 @@
+{
+  "$schema": "https://github.com/Azure/data-api-builder/releases/latest/download/dab.draft.schema.json",
+  "data-source": {
+    "database-type": "postgresql",
+    "connection-string": "Host=localhost;Port=5432;Database=chinook;Username=dab;Password=dab;"
+  },
+  "runtime": {
+    "rest": {
+      "enabled": true,
+      "path": "/api"
+    },
+    "graphql": {
+      "enabled": true,
+      "path": "/graphql"
+    },
+    "mcp": {
+      "enabled": true,
+      "path": "/mcp",
+      "dml-tools": {
+        "create-record": false,
+        "update-record": false,
+        "delete-record": false
+      },
+      "description": "Chinook music store database (read-only). Use the typed entity tools to answer questions about artists, albums, tracks, customers, invoices, and genres."
+    },
+    "host": {
+      "mode": "production",
+      "cors": {
+        "origins": ["*"],
+        "allow-credentials": false
+      },
+      "authentication": {
+        "provider": "StaticWebApps"
+      }
+    }
+  },
+  "entities": {
+    "Artist": {
+      "source": {
+        "object": "artist",
+        "type": "table"
+      },
+      "permissions": [
+        { "role": "anonymous", "actions": ["read"] }
+      ]
+    },
+    "Album": {
+      "source": {
+        "object": "album",
+        "type": "table"
+      },
+      "permissions": [
+        { "role": "anonymous", "actions": ["read"] }
+      ]
+    },
+    "Track": {
+      "source": {
+        "object": "track",
+        "type": "table"
+      },
+      "permissions": [
+        { "role": "anonymous", "actions": ["read"] }
+      ]
+    },
+    "Genre": {
+      "source": {
+        "object": "genre",
+        "type": "table"
+      },
+      "permissions": [
+        { "role": "anonymous", "actions": ["read"] }
+      ]
+    },
+    "MediaType": {
+      "source": {
+        "object": "media_type",
+        "type": "table"
+      },
+      "permissions": [
+        { "role": "anonymous", "actions": ["read"] }
+      ]
+    },
+    "Customer": {
+      "source": {
+        "object": "customer",
+        "type": "table"
+      },
+      "permissions": [
+        { "role": "anonymous", "actions": ["read"] }
+      ]
+    },
+    "Employee": {
+      "source": {
+        "object": "employee",
+        "type": "table"
+      },
+      "permissions": [
+        { "role": "anonymous", "actions": ["read"] }
+      ]
+    },
+    "Invoice": {
+      "source": {
+        "object": "invoice",
+        "type": "table"
+      },
+      "permissions": [
+        { "role": "anonymous", "actions": ["read"] }
+      ]
+    },
+    "InvoiceLine": {
+      "source": {
+        "object": "invoice_line",
+        "type": "table"
+      },
+      "permissions": [
+        { "role": "anonymous", "actions": ["read"] }
+      ]
+    },
+    "Playlist": {
+      "source": {
+        "object": "playlist",
+        "type": "table"
+      },
+      "permissions": [
+        { "role": "anonymous", "actions": ["read"] }
+      ]
+    },
+    "PlaylistTrack": {
+      "source": {
+        "object": "playlist_track",
+        "type": "table"
+      },
+      "permissions": [
+        { "role": "anonymous", "actions": ["read"] }
+      ]
+    }
+  }
+}

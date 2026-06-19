@@ -1,0 +1,7 @@
+# Host-side launcher requirements (provisioning + RBAC only).
+# The orchestrator sandbox installs its own dependencies during bootstrap.
+
+azure-identity>=1.16.0
+azure-mgmt-authorization>=4.0.0
+azure-mgmt-resourcegraph>=8.0.0
+azure-containerapps-sandbox>=0.1.0b1
