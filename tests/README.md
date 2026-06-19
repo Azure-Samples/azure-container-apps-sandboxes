@@ -35,6 +35,21 @@ RUN_E2E=1 uv run --group test pytest tests/e2e
 
 Without `RUN_E2E=1` these tests are collected but skipped.
 
+## Continuous integration
+
+Two workflows, one per tier:
+
+- `.github/workflows/tests-offline.yml` runs the offline gate on every
+  pull request and push to `main`, plus a manual run from the Actions
+  tab. Its `offline-tests` job is the required status check on `main`.
+- `.github/workflows/tests-e2e.yml` runs the real Azure suite. It is
+  manual only (`workflow_dispatch`); it never runs on pull request or
+  push. Run it by hand after a risky change (setup.py, swarm
+  provisioning, egress policy). It logs in to Azure with OIDC, runs
+  `setup.py`, executes `tests/e2e`, then deletes the resource group.
+  It needs three repo secrets: `AZURE_CLIENT_ID`, `AZURE_TENANT_ID`,
+  `AZURE_SUBSCRIPTION_ID` (see the comment header in that file).
+
 ## Layout
 
 ```

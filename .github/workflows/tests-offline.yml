@@ -1,10 +1,16 @@
-name: tests
+name: tests-offline
+
+# Fast offline gate: compiles every sample, imports the SDK and the editable
+# extension, and checks the tree-level conformance rules. No Azure, no secrets.
+# This is the required status check on main. The job name (offline-tests) is
+# the check context, so do not rename it without updating the branch ruleset.
 
 on:
   pull_request:
     branches: [main]
   push:
     branches: [main]
+  workflow_dispatch:
 
 jobs:
   offline-tests:
