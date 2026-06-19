@@ -8,13 +8,14 @@ Secure, isolated compute environments with sub-second startup for agentic worklo
 
 - Azure subscription with permission to create resource groups
 - Azure CLI (`az`) installed and logged in
-- Python 3.10+
+- [uv](https://docs.astral.sh/uv/getting-started/installation/) (installs Python 3.13+ automatically)
 
 ### Install and provision
 
 ```bash
-pip install azure-containerapps-sandbox azure-mgmt-resource azure-mgmt-authorization azure-identity
-python python/samples/setup/setup.py
+uv venv
+uv pip install azure-containerapps-sandbox azure-mgmt-resource azure-mgmt-authorization azure-identity
+uv run python/samples/setup/setup.py
 ```
 
 This creates a resource group, a sandbox group, grants your user the data-plane role, and writes `python/samples/.env`. Role assignments take 30-60 seconds to propagate.
@@ -25,8 +26,8 @@ Optionally install the [`aca` CLI](https://sandboxes.azure.com/docs/sandboxes/qu
 
 ```bash
 cd python/samples/01-webapps/simple-anonymous/python
-pip install -r requirements.txt
-python run.py
+uv pip install -r requirements.txt
+uv run run.py
 ```
 
 A sandbox boots, a Node.js app starts, and a public URL is printed. Open it in a browser to see a live system-stats page served from inside the sandbox. From here, pick any sample below.
