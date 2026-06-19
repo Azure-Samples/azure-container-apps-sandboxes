@@ -64,6 +64,10 @@ jobs:
       - name: Tear down resource group
         if: ${{ always() && inputs.cleanup }}
         run: |
+          if ! az account show >/dev/null 2>&1; then
+            echo "Not logged in to Azure; nothing was provisioned, skipping teardown."
+            exit 0
+          fi
           echo "Deleting resource group aca-sandboxes-samples-rg..."
           az group delete --name aca-sandboxes-samples-rg --yes
           if [ "$(az group exists --name aca-sandboxes-samples-rg)" = "true" ]; then
