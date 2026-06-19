@@ -12,7 +12,9 @@ name: tests-e2e
 #   2. Grant it rights to create the resource group and to assign the
 #      "Container Apps SandboxGroup Data Owner" role (see python/samples/setup).
 #   3. Add three repo secrets: AZURE_CLIENT_ID, AZURE_TENANT_ID,
-#      AZURE_SUBSCRIPTION_ID.
+#      AZURE_SUBSCRIPTION_ID. Also add AZURE_PRINCIPAL_ID (the identity's
+#      object/principal id) so setup.py grants the data-plane role to the
+#      service principal rather than a signed-in user.
 # Until those secrets exist the Azure login step fails fast, which is the
 # expected state for a fork or an unconfigured repo.
 
@@ -54,6 +56,9 @@ jobs:
           subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
 
       - name: Provision sample sandbox group
+        env:
+          ACA_PRINCIPAL_ID: ${{ secrets.AZURE_PRINCIPAL_ID }}
+          ACA_PRINCIPAL_TYPE: ServicePrincipal
         run: uv run python/samples/setup/setup.py --region "${{ inputs.region }}"
 
       - name: Run e2e suite

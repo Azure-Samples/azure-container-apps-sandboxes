@@ -67,6 +67,20 @@ def get_subscription_id() -> str:
     return result.stdout.strip()
 
 
+def resolve_principal() -> tuple[str, str]:
+    """Resolve the principal that receives the data-plane role.
+
+    Interactive default: the signed-in az CLI user. For automation where
+    there is no signed-in user (a service principal or managed identity,
+    for example in CI), set ACA_PRINCIPAL_ID, and optionally
+    ACA_PRINCIPAL_TYPE (defaults to ServicePrincipal).
+    """
+    override = os.environ.get("ACA_PRINCIPAL_ID")
+    if override:
+        return override, os.environ.get("ACA_PRINCIPAL_TYPE", "ServicePrincipal")
+    return get_signed_in_user_id(None), "User"
+
+
 def main():
     parser = argparse.ArgumentParser(description="Provision ACA Sandboxes sample environment")
     parser.add_argument("--resource-group", default="aca-sandboxes-samples-rg", help="Resource group name")
@@ -76,13 +90,13 @@ def main():
     args = parser.parse_args()
 
     subscription_id = args.subscription_id or get_subscription_id()
-    principal_id = get_signed_in_user_id(None)
+    principal_id, principal_type = resolve_principal()
 
     print(f"Subscription: {subscription_id}")
     print(f"Region:       {args.region}")
     print(f"RG:           {args.resource_group}")
     print(f"Sandbox group:{args.sandbox_group}")
-    print(f"Principal:    {principal_id}")
+    print(f"Principal:    {principal_id} ({principal_type})")
     print()
 
     credential = DefaultAzureCredential()
@@ -116,7 +130,7 @@ def main():
                         f"/providers/Microsoft.Authorization/roleDefinitions/{ROLE_DEF_ID}"
                     ),
                     "principalId": principal_id,
-                    "principalType": "User",
+                    "principalType": principal_type,
                 }
             },
         )
