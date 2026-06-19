@@ -1,4 +1,4 @@
-# Sandbox inception swarm — Python SDK variant
+# Sandbox inception swarm: Python SDK variant
 
 Provisions two per-run sandbox groups (orchestrator + workers), grants
 the orchestrator's system-assigned MI `Data Owner` on the worker

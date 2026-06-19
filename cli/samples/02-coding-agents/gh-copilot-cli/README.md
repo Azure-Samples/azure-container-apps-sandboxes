@@ -7,7 +7,7 @@ the customer's PAT onto outbound requests.
 
 See [`../README.md`](../README.md) for the scenario-level concepts,
 architecture diagram, YOLO-mode framing, and threat model. **Read that
-first** — this file only covers what's specific to Copilot CLI.
+first**, this file only covers what's specific to Copilot CLI.
 
 ## Pick a flow
 
@@ -36,7 +36,7 @@ of `token PASTE_PAT_HERE` / `Bearer PASTE_PAT_HERE`.
 
 The three `*githubcopilot.com` hosts use **Transform** rules so the
 proxy injects `Authorization`. The remaining four use plain **Allow**
-host rules — `gh` CLI and HTTPS fetches work without proxy-side auth.
+host rules, `gh` CLI and HTTPS fetches work without proxy-side auth.
 
 > **Footgun**: do NOT add a host-allow rule for `*.githubcopilot.com`.
 > Host rules short-circuit before Transform rules fire, which would
@@ -102,12 +102,12 @@ After the script provisions the sandbox, open the printed URL. If the
 portal lands on a tenant picker, switch to the tenant your sandbox
 subscription lives in. The right-hand **Egress Policy** panel shows
 the three Transform rules, each with `PASTE_PAT_HERE` in the Value
-field — replace that text with your PAT (keep the `token ` or
+field, replace that text with your PAT (keep the `token ` or
 `Bearer ` prefix). Save.
 
 ![Egress Policy panel with PASTE_PAT_HERE placeholder](docs/portal-egress-policy.png)
 
-After Save, **do not screenshot or share the Egress Policy panel** —
+After Save, **do not screenshot or share the Egress Policy panel**,
 the saved Values contain your PAT verbatim. Likewise don't run
 `aca sandbox egress show` against this sandbox; its output prints the
 rule Values.

@@ -1,4 +1,4 @@
-# 03 — Code Interpreter — Azure OpenAI (Python)
+# 03: Code Interpreter, Azure OpenAI (Python)
 
 The runnable demo. See the
 [parent README](../README.md) for prerequisites, AOAI configuration,

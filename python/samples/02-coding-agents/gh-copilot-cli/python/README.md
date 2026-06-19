@@ -1,4 +1,4 @@
-# Coding agents — Copilot CLI (Python)
+# Coding agents: Copilot CLI (Python)
 
 ```bash
 uv run copilot.py

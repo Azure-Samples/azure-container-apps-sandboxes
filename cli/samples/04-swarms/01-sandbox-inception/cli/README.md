@@ -1,8 +1,8 @@
-# Sandbox inception swarm — `aca` CLI variant
+# Sandbox inception swarm: `aca` CLI variant
 
 Same scenario as the Python variant, but the orchestration is bash +
 the `aca` CLI. The script is structured so that **`aca config`** is
-the obvious ergonomic win — neither the host nor the orchestrator pass
+the obvious ergonomic win, neither the host nor the orchestrator pass
 `--subscription` / `--resource-group` / `--group` / `--managed-identity`
 on individual `aca` calls.
 
@@ -19,13 +19,13 @@ claims, production tips) lives in [`../README.md`](../README.md).
 ## Status
 
 End-to-end validated against the **Python SDK variant**
-(see `python/samples/04-swarms/01-sandbox-inception/python/swarm.py`) on `westus2` — π estimated to ±7×10⁻⁴
+(see `python/samples/04-swarms/01-sandbox-inception/python/swarm.py`) on `westus2`, π estimated to ±7×10⁻⁴
 across 4 worker sandboxes spawned via managed identity.
 
 The CLI variant uses the same Azure-side setup but relies on
 `aca --managed-identity` from inside the orchestrator sandbox.
 In `aca` CLI `1.0.0-beta.1`, this path returns 401 when the CLI
-requests a data-plane token from the in-sandbox MI proxy — the
+requests a data-plane token from the in-sandbox MI proxy, the
 managed-identity work end-to-end through the Python SDK in the
 sibling variant. Once the CLI's MI data-plane scope handling lands,
 this script runs unchanged.
@@ -49,15 +49,15 @@ are explicitly converted with `cygpath -w`.
 
 ---
 
-## CLI variant — `aca config` is the showcase
+## CLI variant: `aca config` is the showcase
 
 The CLI variant is built so that **`aca config`** is the obvious win
 over passing `--subscription` / `--resource-group` / `--group` /
 `--managed-identity` on every line. There are two distinct contexts in
-this swarm — host driving Group A, sandbox driving Group B — and
+this swarm, host driving Group A, sandbox driving Group B, and
 config makes each one implicit.
 
-**Host side (driving Group A)** — set the orchestrator group as the
+**Host side (driving Group A)**, set the orchestrator group as the
 current sandbox context once; every later `aca` call uses it:
 
 ```bash
@@ -69,7 +69,7 @@ aca sandboxgroup identity assign --system-assigned --name "$ORCH_GROUP"
 aca sandbox create --disk ubuntu               # implicit --group from config
 ```
 
-**Sandbox side (driving Group B)** — env vars are the same source of
+**Sandbox side (driving Group B)**, env vars are the same source of
 truth as `aca config`, so a few `export`s flip the orchestrator's
 entire context onto the worker group + MI auth:
 
@@ -84,14 +84,14 @@ export ACA_REGION=...
 for i in $(seq 0 $((WORKERS-1))); do
     /tmp/aca sandbox create --disk ubuntu --label worker=$i &
 done
-wait                                           # parallel fan-out — 4 lines
+wait                                           # parallel fan-out, 4 lines
 ```
 
 Without `aca config`, the same loop would carry
 `--subscription X --resource-group Y --group Z --managed-identity system`
-on every line — noisy, error-prone, and obscures the swarm logic. With
+on every line, noisy, error-prone, and obscures the swarm logic. With
 config, the loop reads as the intent: *create four worker sandboxes*.
 
-`aca config show` runs **twice** in the script — once on the host,
-once inside the orchestrator — and both outputs are printed, so you
+`aca config show` runs **twice** in the script, once on the host,
+once inside the orchestrator, and both outputs are printed, so you
 see the two contexts side-by-side.

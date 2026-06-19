@@ -1,8 +1,8 @@
-# 04 — Swarms
+# 04: Swarms
 
 A *swarm* is one orchestrator coordinating many sandbox workers. The
-interesting axis is **who the orchestrator is and how it dispatches**
-— workers themselves are just sandboxes. This folder collects swarm
+interesting axis is **who the orchestrator is and how it dispatches**,
+workers themselves are just sandboxes. This folder collects swarm
 variants, each in its own numbered subfolder. The `aca` CLI variants
 live under [`cli/samples/04-swarms`](../../../cli/samples/04-swarms).
 
@@ -13,7 +13,7 @@ flowchart LR
     classDef host    fill:#fff7e6,stroke:#c89400,color:#5a3d00
 
     host(["your laptop / CI runner"]):::host
-    orch(["orchestrator sandbox<br/>uses group MI — no secrets"]):::sandbox
+    orch(["orchestrator sandbox<br/>uses group MI, no secrets"]):::sandbox
     w1(["worker 0"]):::sandbox
     w2(["worker 1"]):::sandbox
     w3(["worker N"]):::sandbox
@@ -49,12 +49,12 @@ flowchart LR
 
 ## When to pick which
 
-- **01-sandbox-inception** — self-contained agent swarms. The orchestrator
+- **01-sandbox-inception**: self-contained agent swarms. The orchestrator
   is itself a sandbox, the dispatch logic is just `asyncio.gather` (or
   bash `&`), and there's no extra infrastructure to operate. Best
   starting point and the right shape when the orchestrator is *itself*
   an LLM agent that needs to spin up sub-agents on demand.
-- **02-shared-blob-memory** — same identity-inception shape as 01,
+- **02-shared-blob-memory**: same identity-inception shape as 01,
   but with an Azure Blob container the orchestrator and every worker
   read and write through their managed identities. Right shape when
   workers must hand off partial results to siblings, when a

@@ -1,9 +1,9 @@
-# 02 — Shared-blob memory swarm
+# 02: Shared-blob memory swarm
 
 Same cross-group inception shape as
-[`01-sandbox-inception`](../01-sandbox-inception/) — an orchestrator
+[`01-sandbox-inception`](../01-sandbox-inception/), an orchestrator
 sandbox in Group A uses its group's managed identity to fan out N
-workers in Group B — but with **one new piece**: the worker group owns
+workers in Group B, but with **one new piece**: the worker group owns
 a single `AzureBlob` volume that every worker mounts and writes to.
 After the workers are done and their sandboxes are deleted, the
 orchestrator spawns one more sandbox in the worker group, mounts the
@@ -62,13 +62,13 @@ to understanding the security boundary:
 |---|---|---|---|
 | **Host** | `main()`, group/role/volume setup, output parsing | Your laptop / CI runner | Your `az login` (`DefaultAzureCredential`) |
 | **Orchestrator** | `SPAWN_WORKERS_SCRIPT` | Sandbox in **Group A** | Group A's **system-assigned MI** (used to call the SandboxGroup data plane on **Group B**) |
-| **Workers** (×N) | `WORKER_PY` | Sandboxes in **Group B** | None — `open()` against a mounted path |
-| **Aggregator** (×1) | `AGGREGATOR_PY` | Sandbox in **Group B**, started after workers exit | None — `glob` + `open()` against the same path |
+| **Workers** (×N) | `WORKER_PY` | Sandboxes in **Group B** | None, `open()` against a mounted path |
+| **Aggregator** (×1) | `AGGREGATOR_PY` | Sandbox in **Group B**, started after workers exit | None, `glob` + `open()` against the same path |
 
 The host runs *once* and never touches the volume. The orchestrator
 runs *inside a sandbox* and only talks to the SandboxGroup data
 plane (via MI). Workers and the aggregator are single-purpose
-containers with no Azure credentials at all — the platform
+containers with no Azure credentials at all, the platform
 brokers their access to shared storage via the mount.
 
 ## How a swarm run unfolds
@@ -113,17 +113,17 @@ you'd build yourself" framing, see
 
 ## What makes this compelling
 
-1. **Durable shared scratchpad** — checkpoints survive the workers
+1. **Durable shared scratchpad**, checkpoints survive the workers
    that wrote them. A worker can be killed mid-run, restarted on a
    new sandbox, and resume from the last `worker-i.json`.
-2. **Cross-worker visibility without RPC** — sibling agents see each
+2. **Cross-worker visibility without RPC**, sibling agents see each
    other's partial state by listing a directory. No queue, no broker.
-3. **Zero blob plumbing in agent code** — workers do
+3. **Zero blob plumbing in agent code**, workers do
    `open("/mnt/shared/...", "w")`. No `azure-storage-blob`, no
    `BlobServiceClient`, no SAS, no connection strings, no
    `Storage Blob Data Contributor` to grant. The platform handles
    the storage account, container, and identity behind the volume.
-4. **Same MI model as variant 01** — exactly one role assignment
+4. **Same MI model as variant 01**, exactly one role assignment
    (`Container Apps SandboxGroup Data Owner` on the worker group →
    orchestrator MI). Nothing else.
 
@@ -155,7 +155,7 @@ Each file is overwritten with the latest checkpoint:
 
 After all workers exit, the aggregator sandbox `glob`s
 `/mnt/shared/<run-id>/worker-*.json`, parses each file, and prints
-the aggregated payload — proving the data is still there once
+the aggregated payload, proving the data is still there once
 *every* writer is gone.
 
 ## Run it
@@ -183,7 +183,7 @@ DONE worker=3 inside=785203 total=1000000 ckpts=5
 
 ## How the shared state looks in agent code
 
-Worker (no Azure SDK at all — just `open()`):
+Worker (no Azure SDK at all, just `open()`):
 
 ```python
 path = f"/mnt/shared/{run_id}/worker-{i}.json"
@@ -210,7 +210,7 @@ for path in sorted(glob.glob(f"/mnt/shared/{run_id}/worker-*.json")):
   fully-written files.
 - **Resumability**: a restarted worker can `open` its own
   `worker-i.json` and skip past the last checkpoint count before
-  continuing — turning a fan-out swarm into a resumable swarm with
+  continuing, turning a fan-out swarm into a resumable swarm with
   no infrastructure changes.
 - **Cleanup**: the host deletes the volume in the `finally:` block.
   In a real workflow you may want to keep it (one volume per
@@ -220,8 +220,8 @@ for path in sorted(glob.glob(f"/mnt/shared/{run_id}/worker-*.json")):
 ## Compared to variant 01
 
 Variant 01 sends a single Pi estimate back from each worker via
-stdout — workers cannot see each other and nothing about them
+stdout, workers cannot see each other and nothing about them
 survives the run. Variant 02 keeps that orchestrator-driven inception
 shape and adds a shared filesystem that *every* sandbox in the worker
-group can read and write — turning a stateless fan-out into a
+group can read and write, turning a stateless fan-out into a
 stateful multi-agent system.

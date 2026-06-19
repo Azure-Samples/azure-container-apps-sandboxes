@@ -1,4 +1,4 @@
-# Demo 2 — Swarm Research Agent
+# Demo 2: Swarm Research Agent
 
 **Multi-agent parallel research.** Multiple research workers run in parallel,
 each in its own fully-isolated ACA microVM, researching different topics.
@@ -62,7 +62,7 @@ AZURE_OPENAI_DEPLOYMENT=<your-deployment-name>
 AZURE_OPENAI_API_VERSION=2024-12-01-preview
 AZURE_OPENAI_API_KEY=<your-key>
 
-# ACA Sandboxes (optional — falls back to `aca config show`)
+# ACA Sandboxes (optional, falls back to `aca config show`)
 ACA_SUBSCRIPTION=<your-subscription-id>
 ACA_RESOURCE_GROUP=<your-resource-group>
 ACA_SANDBOX_GROUP=<your-sandbox-group>
@@ -70,7 +70,7 @@ ACA_REGION=westus2
 ```
 
 The per-demo `.env.example` is included as a reference for which keys the
-demo reads — you don't need to copy it locally.
+demo reads, you don't need to copy it locally.
 
 **Where to find these values:**
 - **Azure OpenAI**: From Azure Portal → Your OpenAI resource → Keys and Endpoint
@@ -131,9 +131,9 @@ uv run --extra agents swarm_research_agent.py --topic "express|Express.js|https:
 
 Each invocation writes to `./.run-output/swarm-<run_id>/`:
 
-- `final-answer.md` — aggregated research across all topics
-- `summary.json` — structured data (topics, timing, success rate)
-- `findings/<topic-key>.md` — each worker's raw output + telemetry
+- `final-answer.md`, aggregated research across all topics
+- `summary.json`, structured data (topics, timing, success rate)
+- `findings/<topic-key>.md`, each worker's raw output + telemetry
 
 ## Example output (truncated)
 
@@ -168,7 +168,7 @@ SWARM COMPLETE
 
 ## Notes
 
-**"OPENAI_API_KEY is not set, skipping trace export"** — This warning is harmless. It's about optional telemetry/tracing to OpenAI's platform. Your Azure OpenAI connection works fine via `AZURE_OPENAI_API_KEY` and doesn't need the separate `OPENAI_API_KEY`. You can safely ignore this message.
+**"OPENAI_API_KEY is not set, skipping trace export"**, This warning is harmless. It's about optional telemetry/tracing to OpenAI's platform. Your Azure OpenAI connection works fine via `AZURE_OPENAI_API_KEY` and doesn't need the separate `OPENAI_API_KEY`. You can safely ignore this message.
 
 ## Customizing
 
@@ -179,5 +179,5 @@ SWARM COMPLETE
 
 ## Where to go next
 
-- **[`../01-deep-research-single/`](../01-deep-research-single)** — Single-agent repo analysis demo
-- **[`../sandbox-agent-extension/`](../sandbox-agent-extension)** — The `agents_aca_sandboxes` provider itself
+- **[`../01-deep-research-single/`](../01-deep-research-single)**: Single-agent repo analysis demo
+- **[`../sandbox-agent-extension/`](../sandbox-agent-extension)**: The `agents_aca_sandboxes` provider itself

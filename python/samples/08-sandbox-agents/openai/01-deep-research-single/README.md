@@ -1,4 +1,4 @@
-# Demo 1 — Deep Research Agent
+# Demo 1: Deep Research Agent
 
 **Single-agent repo analysis.** A `SandboxAgent` clones any public GitHub repository into an isolated ACA microVM, explores the code and documentation, and answers questions about it.
 
@@ -49,7 +49,7 @@ AZURE_OPENAI_DEPLOYMENT=<your-deployment-name>
 AZURE_OPENAI_API_VERSION=2024-12-01-preview
 AZURE_OPENAI_API_KEY=<your-key>
 
-# ACA Sandboxes (optional — falls back to `aca config show`)
+# ACA Sandboxes (optional, falls back to `aca config show`)
 ACA_SUBSCRIPTION=<your-subscription-id>
 ACA_RESOURCE_GROUP=<your-resource-group>
 ACA_SANDBOX_GROUP=<your-sandbox-group>
@@ -57,7 +57,7 @@ ACA_REGION=westus2
 ```
 
 The per-demo `.env.example` is included as a reference for which keys the
-demo reads — you don't need to copy it locally.
+demo reads, you don't need to copy it locally.
 
 **Where to find these values:**
 - **Azure OpenAI**: From Azure Portal → Your OpenAI resource → Keys and Endpoint
@@ -141,7 +141,7 @@ Citations:
 
 ## Notes
 
-**"OPENAI_API_KEY is not set, skipping trace export"** — This warning is harmless. It's about optional telemetry/tracing to OpenAI's platform. Your Azure OpenAI connection works fine via `AZURE_OPENAI_API_KEY` and doesn't need the separate `OPENAI_API_KEY`. You can safely ignore this message.
+**"OPENAI_API_KEY is not set, skipping trace export"**, This warning is harmless. It's about optional telemetry/tracing to OpenAI's platform. Your Azure OpenAI connection works fine via `AZURE_OPENAI_API_KEY` and doesn't need the separate `OPENAI_API_KEY`. You can safely ignore this message.
 
 ## Customizing
 
@@ -151,5 +151,5 @@ Citations:
 
 ## Where to go next
 
-- **[`../sandbox-agent-extension/`](../sandbox-agent-extension)** — The `agents_aca_sandboxes` provider itself
-- **[`../02-swarm-research-parallel/`](../02-swarm-research-parallel)** — Multi-agent parallel swarm research
+- **[`../sandbox-agent-extension/`](../sandbox-agent-extension)**: The `agents_aca_sandboxes` provider itself
+- **[`../02-swarm-research-parallel/`](../02-swarm-research-parallel)**: Multi-agent parallel swarm research

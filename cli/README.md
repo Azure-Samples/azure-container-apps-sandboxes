@@ -1,6 +1,6 @@
 # 14 · `aca` CLI reference
 
-Reference documentation for the `aca` CLI. Covers installation, configuration, and the capabilities that aren't already demonstrated by the functional guides (00 – 13). Each section is independent — jump to whichever topic you need.
+Reference documentation for the `aca` CLI. Covers installation, configuration, and the capabilities that aren't already demonstrated by the functional guides (00 – 13). Each section is independent, jump to whichever topic you need.
 
 > Verified against `aca 1.0.0-beta.1`. Every command and output block was executed before being pasted.
 
@@ -25,9 +25,9 @@ Reference documentation for the `aca` CLI. Covers installation, configuration, a
 ## Prerequisites
 
 - An **Azure subscription** with a resource group you can create resources in
-- The **Azure CLI** (`az`) — installed and logged in. `aca` delegates auth to `az login`.
+- The **Azure CLI** (`az`), installed and logged in. `aca` delegates auth to `az login`.
   - <https://learn.microsoft.com/cli/azure/install-azure-cli>
-- A shell — Bash on Linux/macOS, PowerShell or Bash (Git Bash / WSL) on Windows
+- A shell, Bash on Linux/macOS, PowerShell or Bash (Git Bash / WSL) on Windows
 
 The `aca` CLI itself is installed in the next section.
 
@@ -130,7 +130,7 @@ aca sandbox delete --id <sandbox-id> --yes
 
 ## Auth
 
-`aca` does not maintain its own credential store. Auth is delegated to the Azure CLI — same identity, same MFA, same conditional-access policies.
+`aca` does not maintain its own credential store. Auth is delegated to the Azure CLI, same identity, same MFA, same conditional-access policies.
 
 ```bash
 aca auth login    # delegates to `az login`
@@ -181,7 +181,7 @@ Available on every command. Also settable via `ACA_SANDBOX_MANAGED_IDENTITY` or 
 
 ## Help commands
 
-Every command, group, and sub-group responds to `--help` (or `-h`). The help text is the source of truth — examples, flags, env-var names, and defaults are all there.
+Every command, group, and sub-group responds to `--help` (or `-h`). The help text is the source of truth, examples, flags, env-var names, and defaults are all there.
 
 ```bash
 aca --help                          # top-level: commands + global flags + quick start + scenarios
@@ -239,7 +239,7 @@ Other command-specific short forms:
 |---|---|---|
 | `--command` | `-c` | `aca sandbox exec`, `aca sandbox shell` |
 
-> The CLI also recognizes `-h` as a short-form of `--help` on every command — useful for a quick summary without the long-form descriptions.
+> The CLI also recognizes `-h` as a short-form of `--help` on every command, useful for a quick summary without the long-form descriptions.
 
 [↑ Back to top](#contents)
 
@@ -269,13 +269,13 @@ Env wins over CLI config but loses to an explicit flag. See [Config → Preceden
 
 ### Why customers care
 
-Stop typing `-s … -g … --sandbox-group …` on every command. Set once, work for the rest of the session — with a precedence model that lets CI override anything via env vars without editing files.
+Stop typing `-s … -g … --sandbox-group …` on every command. Set once, work for the rest of the session, with a precedence model that lets CI override anything via env vars without editing files.
 
 ### Sections
 
 | Section | What goes there |
 |---|---|
-| **Shared Defaults** | Subscription, resource group, region — used by every command that doesn't override them. |
+| **Shared Defaults** | Subscription, resource group, region, used by every command that doesn't override them. |
 | **Sandbox** | Sandbox-specific keys: sandbox group, auto-resume behavior, current sandbox, managed identity, audience, allowed regions, and per-section overrides for sub/RG/region. |
 
 ### See your current config
@@ -381,10 +381,10 @@ Sample output (all green):
 ✓ Sandbox group 'ai-apps-samples-group' exists in Azure
 ✓ Container Apps SandboxGroup Data Owner role assigned
 
-aca 1.0.0-beta.1 — all checks passed
+aca 1.0.0-beta.1, all checks passed
 ```
 
-Each line also shows **where the value came from** — `(config)`, `(config: sandbox)`, `(env)`, `(flag)` — gold when debugging precedence.
+Each line also shows **where the value came from**, `(config)`, `(config: sandbox)`, `(env)`, `(flag)`, gold when debugging precedence.
 
 ### What each check verifies, and how to fix it
 
@@ -405,7 +405,7 @@ Each line also shows **where the value came from** — `(config)`, `(config: san
 
 ## YAML spec workflow
 
-Define a sandbox in YAML, validate, then apply. CLI-only — the SDK has no equivalent.
+Define a sandbox in YAML, validate, then apply. CLI-only, the SDK has no equivalent.
 
 This is the infra-as-code story for sandboxes: check specs into git, code-review them, validate in CI before apply, and get editor autocomplete from the published JSON Schema.
 
@@ -466,7 +466,7 @@ Point your editor at it (`yaml.schemas` in VS Code, `yaml-language-server` in Ne
 aca sandbox validate --file sandbox.yaml
 ```
 
-Exit code is non-zero on failure — drop this into a pre-merge check to catch spec drift before it hits Azure.
+Exit code is non-zero on failure, drop this into a pre-merge check to catch spec drift before it hits Azure.
 
 [↑ Back to top](#contents)
 
@@ -492,8 +492,8 @@ aca sandbox exec -l "name=dev" -c "echo hello"
 
 ### Selector grammar
 
-- `key=value` — match exactly
-- `key1=v1,key2=v2` — AND (all pairs must match)
+- `key=value`, match exactly
+- `key1=v1,key2=v2`, AND (all pairs must match)
 - Spaces around `=` and `,` are **not** allowed
 - For `get` and `delete`, the CLI matches the **first** sandbox satisfying the selector
 
@@ -520,10 +520,10 @@ aca sandbox delete -l "env=ci,role=worker"
 
 | Use | Form |
 |---|---|
-| Long-lived dev sandbox | Selector — friendlier in shell history |
-| Output of a previous command | UUID — already in your shell variable |
+| Long-lived dev sandbox | Selector, friendlier in shell history |
+| Output of a previous command | UUID, already in your shell variable |
 | Batch over many | `list -o json` + `jq` + UUID loop |
-| Cleanup by ownership tag | Selector — labels are your contract |
+| Cleanup by ownership tag | Selector, labels are your contract |
 
 [↑ Back to top](#contents)
 
@@ -613,6 +613,6 @@ Stdout stays clean for piping; verbose / debug traces go to stderr so you can ca
 
 ## See also
 
-- Functional guides and samples — (samples/) — runnable per-capability samples for CLI
-- [Python SDK reference](../python/README.md) — equivalent reference doc for the Python SDK
+- Functional guides and samples, (samples/), runnable per-capability samples for CLI
+- [Python SDK reference](../python/README.md), equivalent reference doc for the Python SDK
 - Upstream [`aca` CLI README](https://github.com/microsoft/azure-container-apps/blob/main/aca-cli/preview/README.md)

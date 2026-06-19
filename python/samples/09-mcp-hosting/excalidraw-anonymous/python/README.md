@@ -1,4 +1,4 @@
-# excalidraw-anonymous — Python SDK driver
+# excalidraw-anonymous: Python SDK driver
 
 ```bash
 uv run run.py

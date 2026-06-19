@@ -24,12 +24,12 @@ the same MCP server.
 {file_props}
 ```
 
-## SharePoint context (do not look up — set in your env){sharepoint_target}
+## SharePoint context (do not look up: set in your env){sharepoint_target}
 
 ## SharePoint MCP tool reference
 
 The `sharepoint` MCP server exposes these tools (case sensitive,
-camelCase). Don't invent tool names. Don't call `tools/list` — the
+camelCase). Don't invent tool names. Don't call `tools/list`, the
 ones below are what you need:
 
 - `getSiteByPath(hostname, serverRelativePath)` → returns site, including `id`
@@ -53,7 +53,7 @@ needs. You need to:
 ## What to do
 
 1. Use the steps above to download the file into
-   `{workspace}/input.pdf` (the MCP returns base64 — decode it
+   `{workspace}/input.pdf` (the MCP returns base64, decode it
    yourself with `python3 -c 'import base64,sys; sys.stdout.buffer.write(base64.b64decode(open("/tmp/b64").read()))'`
    or similar).
 2. Extract the invoice text. First try `pdftotext input.pdf -`. If
@@ -100,5 +100,5 @@ needs. You need to:
 Do not invent fields you didn't read from the file. Do not call any
 tools other than the `sharepoint` MCP server and shell commands in
 your workspace. The MCP server is authorized by an API key the
-egress proxy stamps on your behalf — you do not need to add any
+egress proxy stamps on your behalf, you do not need to add any
 auth headers.

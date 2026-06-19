@@ -1,9 +1,9 @@
-# dab-sql-devtunnel — Database → MCP, no inbound port on the sandbox
+# dab-sql-devtunnel: Database → MCP, no inbound port on the sandbox
 
 Run **PostgreSQL + the Chinook sample database + the Data API Builder
 (DAB) SQL MCP Server** all inside one Azure Container Apps sandbox, and
 expose the MCP endpoint to the public internet via **Microsoft Dev
-Tunnels** — so the sandbox itself never opens an inbound port.
+Tunnels**, so the sandbox itself never opens an inbound port.
 
 > Part of [scenarios/09-mcp-hosting](../README.md). See the sibling
 > pattern [`excalidraw-anonymous`](../excalidraw-anonymous/) for the
@@ -23,7 +23,7 @@ glue code, and without exposing the database to the public internet.
   first to discover what's available, then `read_records` with OData
   filters/sort/paging to answer questions.
 - DAB enforces RBAC per role per entity. The agent literally cannot
-  call operations the config doesn't grant — this demo is read-only
+  call operations the config doesn't grant, this demo is read-only
   for the `anonymous` role.
 - DAB deliberately does **not** do NL2SQL. The agent's tools are
   deterministic, parameterized, and auditable.
@@ -31,7 +31,7 @@ glue code, and without exposing the database to the public internet.
 And by using Dev Tunnels for exposure:
 
 - The sandbox has **zero inbound ports open**.
-- Postgres and DAB both bind to `localhost` — unreachable from
+- Postgres and DAB both bind to `localhost`, unreachable from
   anywhere except via the outbound tunnel.
 - Dev Tunnels handles HTTPS termination and gives you a stable public
   URL (e.g. `https://<id>-5000.usw2.devtunnels.ms`).
@@ -54,7 +54,7 @@ flowchart LR
 
 1. An Azure subscription with the **Azure Container Apps sandbox**
    feature enabled. (See repo root [setup guide](../../../setup/).)
-2. Azure CLI logged in (`az login`) — the script uses
+2. Azure CLI logged in (`az login`), the script uses
    `DefaultAzureCredential` to authenticate to the sandbox group.
 3. Python 3.10+.
 4. `samples/.env` written by `python/samples/setup/setup.py`
@@ -91,7 +91,7 @@ do at each step.
    MCP `initialize` against `http://localhost:5000/mcp`.
 8. Downloads the `devtunnel` CLI binary directly
    (`https://aka.ms/TunnelsCliDownload/linux-x64`).
-9. **Pauses for a one-time interactive login** — prints the device-code
+9. **Pauses for a one-time interactive login**, prints the device-code
    instructions and waits for you to complete sign-in in a browser. The
    token is cached inside the sandbox for the rest of the run.
    (See "About Dev Tunnels login" below.)
@@ -107,7 +107,7 @@ do at each step.
 
 - Points DAB at local Postgres on `localhost:5432`.
 - Enables MCP at `/mcp`, REST at `/api`, GraphQL at `/graphql`.
-- Sets `authentication.provider: "StaticWebApps"` — with no
+- Sets `authentication.provider: "StaticWebApps"`, with no
   `X-MS-CLIENT-PRINCIPAL` header on incoming requests (which is what
   the Dev Tunnels relay sends), DAB treats the caller as the
   **`anonymous` role**. This is the right knob for "MCP without auth"
@@ -122,7 +122,7 @@ do at each step.
 The `dab/dab` Postgres password in the connection string is intentional
 for this sandbox-local demo: Postgres binds to `localhost` only, the
 sandbox is ephemeral, and the credential never leaves the sandbox.
-**Do not copy this pattern for any non-demo deployment** — use a managed
+**Do not copy this pattern for any non-demo deployment**, use a managed
 identity or Key Vault reference instead.
 
 ## About Dev Tunnels login
@@ -134,7 +134,7 @@ device-code flow:
 
 ```
 ========================================================================
-ACTION REQUIRED — Dev Tunnels device-code login
+ACTION REQUIRED, Dev Tunnels device-code login
 ========================================================================
   1. Open: https://login.microsoft.com/device
   2. Enter the code shown in the sandbox: code <YOUR-CODE>
@@ -161,7 +161,7 @@ normal chat:
 
 The agent calls `describe_entities` to discover the schema, then
 `read_records` with OData filters/sort/paging to answer. **No SQL is
-written by anyone** — schema, types, filters, and permissions all
+written by anyone**, schema, types, filters, and permissions all
 flow from `dab-config.json`.
 
 ## Use it from your MCP client
@@ -202,7 +202,7 @@ npx -y @modelcontextprotocol/inspector <URL>
 ```
 
 Opens a browser UI listing every tool DAB exposes, with full input
-schemas — great for confirming permissions landed the way you
+schemas, great for confirming permissions landed the way you
 configured them.
 
 ## Cleanup
@@ -229,17 +229,17 @@ python -c "from azure.identity import DefaultAzureCredential; from azure.contain
   host ... --allow-tenant <tenant>`) and use a non-anonymous DAB
   authentication provider
   ([docs](https://learn.microsoft.com/azure/data-api-builder/authentication)).
-- **Bake the disk.** [Guide 03 (disks)](../../../guides/03-disks/README.md)
-  — pre-install Postgres + .NET + DAB + devtunnel onto a custom disk so
+- **Bake the disk.** [Guide 03 (disks)](../../../guides/03-disks/README.md):
+  pre-install Postgres + .NET + DAB + devtunnel onto a custom disk so
   cold start is "boot the DB" instead of "install everything."
-- **Snapshot with seed data.** [Guide 02 (snapshots)](../../../guides/02-snapshots/README.md)
-  — snapshot after Chinook is loaded; each restored sandbox starts with
+- **Snapshot with seed data.** [Guide 02 (snapshots)](../../../guides/02-snapshots/README.md):
+  snapshot after Chinook is loaded; each restored sandbox starts with
   a fresh, identical DB in ~1s.
-- **Auto-suspend.** [Guide 05 (lifecycle)](../../../guides/05-lifecycle/README.md)
-  — idle MCP sandboxes shouldn't burn quota; suspend on inactivity and
+- **Auto-suspend.** [Guide 05 (lifecycle)](../../../guides/05-lifecycle/README.md):
+  idle MCP sandboxes shouldn't burn quota; suspend on inactivity and
   resume on the next request.
-- **Lock down egress.** [Guide 08 (egress)](../../../guides/08-egress/README.md)
-  — set `set_egress_default("Deny")` and allow only the hosts the
+- **Lock down egress.** [Guide 08 (egress)](../../../guides/08-egress/README.md):
+  set `set_egress_default("Deny")` and allow only the hosts the
   pattern needs:
 
   | Host | Why |

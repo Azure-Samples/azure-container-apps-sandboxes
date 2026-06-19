@@ -1,8 +1,8 @@
-# 03 — Code Interpreter — Azure OpenAI
+# 03: Code Interpreter, Azure OpenAI
 
 A self-contained Azure OpenAI driver for the code-interpreter loop
 described in the [parent README](../README.md). One file
-([`python/run.py`](python/run.py)), no agent framework — just
+([`python/run.py`](python/run.py)), no agent framework, just
 `chat.completions.create` + three function-calling tools.
 
 ## What it ships
@@ -23,7 +23,7 @@ described in the [parent README](../README.md). One file
 ## Prerequisites
 
 1. The sandbox baseline is provisioned (`uv run python/samples/setup/setup.py`). This writes the `ACA_*` keys to `samples/.env`.
-2. An **Azure OpenAI** deployment that supports tool calling — `gpt-4o`, `gpt-4o-mini`, `gpt-4.1`, `gpt-5`, `o4-mini` all qualify.
+2. An **Azure OpenAI** deployment that supports tool calling, `gpt-4o`, `gpt-4o-mini`, `gpt-4.1`, `gpt-5`, `o4-mini` all qualify.
 3. The following added to `samples/.env`:
 
    ```bash
@@ -34,7 +34,7 @@ described in the [parent README](../README.md). One file
    ```
 
    If `AZURE_OPENAI_API_KEY` is omitted, the script uses
-   `DefaultAzureCredential` against the deployment — the caller needs
+   `DefaultAzureCredential` against the deployment, the caller needs
    the **Cognitive Services OpenAI User** role on the AOAI resource.
 
 ## Run it
@@ -62,7 +62,7 @@ Plots saved by the model under `/workspace/out/` are auto-downloaded to
 
 ```
 ========================================================================
-CODE INTERPRETER — Azure OpenAI in an ACA sandbox
+CODE INTERPRETER, Azure OpenAI in an ACA sandbox
 ========================================================================
 ==> deployment    : gpt-4o-mini
 ==> sandbox group : ai-apps-samples-group (westus2)
@@ -114,7 +114,7 @@ Saved 1 artifact(s) to .../out:
 - **Cold-start cost.** First boot installs ~120 MB of pip packages
   (~30 s on `python-3.14`). For repeated demos, follow the "bake the
   disk" tip in the [parent README](../README.md).
-- **Single-cell semantics.** Each `python_exec` is a fresh process —
+- **Single-cell semantics.** Each `python_exec` is a fresh process,
   the model can't rely on previous `import` lines. It learns this fast
   (write helpers as files, re-import) but if you want notebook semantics,
   use a long-lived background interpreter instead. (Possible follow-up
