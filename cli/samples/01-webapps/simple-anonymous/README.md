@@ -23,35 +23,27 @@ and a get-started panel for visitors to spin up their own.
   - `GET /api/sysinfo` → uname-style: kernel, distro, CPU model, IP, …
   - `GET /api/stats` → live `loadavg`, memory, process count, uptime
   - `GET /api/processes` → top 10 by RSS, read from `/proc/[0-9]*`
-- A Python SDK and an `aca` CLI driver, same flow, two flavors.
+- An `aca` CLI driver (`run.sh`) that uploads the app, starts it, and exposes the port.
 - Bounded readiness polling (no fragile `sleep N`) and JSON-shape
   assertions on every endpoint.
 - A try/finally cleanup that removes the port before deleting the sandbox.
 
 ## Prerequisites
 
-- `python/samples/.env` populated (run `uv run python/samples/setup/setup.py` from the repo root if you haven't yet)
+- `python/samples/.env` populated (run `python python/samples/setup/setup.py` from the repo root if you haven't yet)
 
 ## Run it
-
-### Python SDK
-
-```bash
-cd python
-uv run run.py
-```
-
-### `aca` CLI
 
 ```bash
 cd cli
 bash run.sh
 ```
 
-> On Windows without bash, use the Python flavor above.
+Reads configuration from `samples/.env`. Override the disk image with
+`ACA_WEBAPP_DISK=...` (default: `node-22`).
 
-Both flows read configuration from `samples/.env`. Override the disk
-image with `ACA_WEBAPP_DISK=...` (default: `node-22`).
+> Prefer the SDK? See the Python version under
+> [`python/samples/01-webapps/simple-anonymous`](../../../../python/samples/01-webapps/simple-anonymous).
 
 ## Production tips
 
@@ -79,12 +71,9 @@ image with `ACA_WEBAPP_DISK=...` (default: `node-22`).
 ```
 simple-anonymous/
 ├── README.md              ← this file
-├── app/                   ← Node app (shared by python and cli)
+├── app/                   ← Node app deployed by the CLI flow
 │   ├── server.js
 │   └── package.json
-├── python/
-│   ├── README.md
-│   └── run.py
 └── cli/
     ├── README.md
     └── run.sh

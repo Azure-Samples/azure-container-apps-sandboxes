@@ -69,7 +69,7 @@ sequenceDiagram
     autonumber
     actor Op as Operator
     actor Cust as Customer (browser)
-    participant Script as copilot.py / run.sh
+    participant Script as run.sh
     participant CP as ACA control plane
     participant W as Copilot CLI<br/>(in sandbox)
     participant Px as Egress proxy
@@ -102,7 +102,7 @@ sequenceDiagram
 
 | Location                                | PAT present? |
 | --------------------------------------- | ------------ |
-| Operator script (`copilot.py` / `run.sh`) | ❌           |
+| Operator script (`run.sh`)                | ❌           |
 | Operator env / shell history / tempfiles  | ❌           |
 | Customer browser (during paste)           | ✅           |
 | ACA control plane (egress policy state)   | ✅           |
@@ -135,9 +135,8 @@ deliberately blind to it.
 
 ## Prerequisites
 
-- The shared sandbox baseline has been provisioned,
-  `python/samples/setup/setup.py` **or**
-  `python/samples/setup/setup.py`.
+- The shared sandbox baseline has been provisioned
+  (`python/samples/setup/setup.py` from the repo root).
 - A GitHub PAT with Copilot access (see below).
 
 ### Getting a GitHub PAT
@@ -157,16 +156,6 @@ identity; entitlement is checked server-side by GitHub.
 
 ## How to run
 
-### Python (portal-only)
-
-```bash
-cd gh-copilot-cli/python
-uv run copilot.py
-```
-
-The Python flow prints the portal URL and waits, you paste the PAT
-in the portal and run `copilot` from the portal's `bash` tab.
-
 ### CLI (bash, with optional in-terminal shell)
 
 ```bash
@@ -174,14 +163,14 @@ cd gh-copilot-cli/cli
 ./run.sh
 ```
 
-The CLI flow prints the same URL, waits for you to paste, and then
+The CLI flow prints the portal URL, waits for you to paste, and then
 drops you into an **interactive shell inside the sandbox** via
 `aca sandbox shell`. You can run `copilot` from your own terminal
 instead of the portal. When you `exit` the shell, the script deletes
 the sandbox. (You can also still use the portal bash tab if you
 prefer; just press Enter without opening a shell session.)
 
-Both flows produce the same sandbox configuration: deny-default
+The flow produces a sandbox configured with deny-default
 egress, four GitHub host-allows, three placeholder Transform rules.
 
 For Copilot-specific details, where to paste the PAT in the portal
@@ -203,13 +192,12 @@ the verification recipe, see [`gh-copilot-cli/README.md`](gh-copilot-cli/README.
   customers actually run.
 - **Footgun: `*.githubcopilot.com` host rules.** A host-allow rule for
   `*.githubcopilot.com` short-circuits the matching Transform rule and
-  the request goes out unauthenticated. The Python script asserts no
-  such rule exists after applying its rules; the bash flow `grep`s
+  the request goes out unauthenticated. The bash flow `grep`s
   `policy.yaml` for the same string before applying. If you edit the
   policy in the portal later, don't add such a rule.
 - **Cleanup is best-effort.** Pressing Enter in the operator terminal
   deletes the sandbox (and the egress policy with its pasted PAT). The
-  Python `finally` and bash `trap` also fire on Ctrl+C and most exits,
+  bash `trap` also fires on Ctrl+C and most exits,
   but **not** reliably on `kill -9`, terminal-window close, SSH drop,
   laptop sleep, or host crash. If you suspect a sandbox leaked, list
   by label and delete manually:

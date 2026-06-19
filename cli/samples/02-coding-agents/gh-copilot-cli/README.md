@@ -9,14 +9,13 @@ See [`../README.md`](../README.md) for the scenario-level concepts,
 architecture diagram, YOLO-mode framing, and threat model. **Read that
 first**, this file only covers what's specific to Copilot CLI.
 
-## Pick a flow
+## Run it
 
-| Folder                  | When to use                                                                 |
-| ----------------------- | --------------------------------------------------------------------------- |
-| [`python/`](python/)    | You prefer the SDK. Run `copilot` from the portal's `bash` tab.             |
-| [`cli/`](cli/)          | You prefer bash. After paste, the script drops you into `aca sandbox shell` so you can run `copilot` from your own terminal. |
+The [`cli/`](cli/) flow provisions the sandbox with bash + the `aca`
+CLI. After you paste the PAT, the script drops you into
+`aca sandbox shell` so you can run `copilot` from your own terminal.
 
-Both flows produce the same sandbox: deny-default egress, four
+It produces a sandbox with deny-default egress, four
 GitHub host-allows, three Transform rules with `Authorization` Values
 of `token PASTE_PAT_HERE` / `Bearer PASTE_PAT_HERE`.
 

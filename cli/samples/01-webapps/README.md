@@ -18,7 +18,6 @@ Each pattern is fully self-contained under its own folder:
 ├── simple-anonymous/
 │   ├── README.md
 │   ├── app/{server.js, package.json}
-│   ├── python/{run.py, README.md}
 │   └── cli/{run.sh, README.md}
 └── authenticated/                   ← coming soon
     └── …
@@ -27,8 +26,8 @@ Each pattern is fully self-contained under its own folder:
 ## Pick a pattern
 
 - **simple-anonymous**: start here. Public-internet `Hello world`, easiest
-  thing to demo, no auth setup. Five-line CLI version, five-line SDK
-  version, one shared Node app. The landing page proves the box is a
+  thing to demo, no auth setup. Five-line CLI version with one shared Node
+  app. The landing page proves the box is a
   real VM (live load avg, memory, top processes from `/proc`).
 - **authenticated** *(planned)*, the right pattern for anything
   customer-facing. Same app, but `add_port(8080, email="...")` puts the
