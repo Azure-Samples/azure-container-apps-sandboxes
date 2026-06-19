@@ -63,4 +63,11 @@ jobs:
 
       - name: Tear down resource group
         if: ${{ always() && inputs.cleanup }}
-        run: az group delete --name aca-sandboxes-samples-rg --yes --no-wait || true
+        run: |
+          echo "Deleting resource group aca-sandboxes-samples-rg..."
+          az group delete --name aca-sandboxes-samples-rg --yes
+          if [ "$(az group exists --name aca-sandboxes-samples-rg)" = "true" ]; then
+            echo "Resource group still present after delete" >&2
+            exit 1
+          fi
+          echo "Cleanup confirmed: resource group deleted, no sandboxes or meters running."
