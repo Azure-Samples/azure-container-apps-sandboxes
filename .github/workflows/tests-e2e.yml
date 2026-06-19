@@ -64,7 +64,7 @@ jobs:
       - name: Run e2e suite
         env:
           RUN_E2E: "1"
-        run: uv run pytest tests/e2e -v
+        run: uv run pytest tests/e2e -m e2e -v
 
       - name: Tear down resource group
         if: ${{ always() && inputs.cleanup }}
