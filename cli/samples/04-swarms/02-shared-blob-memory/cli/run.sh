@@ -115,10 +115,10 @@ for attempt in 1 2 3 4 5 6 7 8 9 10; do
 done
 rm -f /tmp/role.err
 
-# The host created the orchestrator group fresh, so it has no data-plane
-# grant there yet (setup only grants on the samples group). Grant the host
-# Data Owner on the orchestrator group so it can boot the orchestrator
-# sandbox below.
+# The host created both groups fresh, so it has no data-plane grant on
+# either yet (setup only grants on the samples group). Grant the host Data
+# Owner on the orchestrator group so it can boot the orchestrator sandbox,
+# and on the worker group so it can create the shared volume below.
 HOST_ID="$(az ad signed-in-user show --query id -o tsv 2>/dev/null)"
 if [[ -z "$HOST_ID" ]]; then
     echo "error: could not resolve signed-in user id (run 'az login')" >&2
@@ -139,12 +139,28 @@ if ! aca sandboxgroup role create \
 fi
 rm -f /tmp/hostrole.err
 
+echo "==> Granting '$ROLE_NAME' on $WORKER_GROUP -> host user..."
+if ! aca sandboxgroup role create \
+        --role "$ROLE_NAME" \
+        --principal-id "$HOST_ID" \
+        --group "$WORKER_GROUP" 2>/tmp/hostrole.err; then
+    if grep -q "RoleAssignmentExists\|already exists" /tmp/hostrole.err 2>/dev/null; then
+        echo "    host role already assigned"
+    else
+        cat /tmp/hostrole.err >&2
+        echo "error: host role grant on $WORKER_GROUP failed" >&2
+        exit 1
+    fi
+fi
+rm -f /tmp/hostrole.err
+
 echo "==> Waiting 20s for RBAC propagation..."
 sleep 20
 
 echo "==> Creating AzureBlob volume '$VOLUME_NAME' on $WORKER_GROUP..."
-# Volume creation uses the host's `az login` against the worker group;
-# the orchestrator MI will later mount it (Data Owner covers both).
+# Volume creation uses the host's `az login` against the worker group
+# (the host grant above); the orchestrator MI later mounts it via its own
+# worker-group grant.
 # Briefly flip context to the worker group, create, then flip back so
 # the rest of the host script keeps targeting the orchestrator group.
 aca config sandbox set --group "$WORKER_GROUP" --region "$ACA_SANDBOXGROUP_REGION" >/dev/null

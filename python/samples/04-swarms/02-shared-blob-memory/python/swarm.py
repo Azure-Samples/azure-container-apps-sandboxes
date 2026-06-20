@@ -355,10 +355,11 @@ def main() -> None:
         print(f"==> Granting {ROLE_NAME!r} on worker group → orchestrator MI...")
         _assign_role(auth, worker_group_scope, orch_pid)
 
-        # The host created the orchestrator group fresh, so it has no
-        # data-plane grant there yet (setup only grants on the samples
-        # group). Grant the host Data Owner on the orchestrator group so it
-        # can boot the orchestrator sandbox below.
+        # The host created both groups fresh, so it has no data-plane grant
+        # on either yet (setup only grants on the samples group). Grant the
+        # host Data Owner on the orchestrator group so it can boot the
+        # orchestrator sandbox, and on the worker group so it can create the
+        # shared volume below.
         host_id, host_type = _resolve_host_principal()
         orch_group_scope = (
             f"/subscriptions/{subscription}/resourceGroups/{resource_group}"
@@ -366,6 +367,8 @@ def main() -> None:
         )
         print(f"==> Granting {ROLE_NAME!r} on orchestrator group → host {host_type.lower()}...")
         _assign_role(auth, orch_group_scope, host_id, host_type)
+        print(f"==> Granting {ROLE_NAME!r} on worker group → host {host_type.lower()}...")
+        _assign_role(auth, worker_group_scope, host_id, host_type)
 
         print(f"==> Waiting {RBAC_PROPAGATION_SECONDS}s for RBAC propagation...")
         time.sleep(RBAC_PROPAGATION_SECONDS)
