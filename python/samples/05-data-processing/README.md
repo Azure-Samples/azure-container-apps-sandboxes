@@ -157,7 +157,7 @@ Tune the workload with environment variables before launching:
 ```text
 ==> Booting aggregator (reads /mnt/shared/processed/, writes summary)...
     aggregator: 11111111-2222-3333-4444-555555555555
-    staged aggregator.py into 11111111… (2,863 bytes)
+    staged aggregator.py into 11111111… (2,441 bytes)
     ▶ exec on 11111111…: aggregator.py
 
 ========================================================================
@@ -165,20 +165,20 @@ PIPELINE REPORT
 ========================================================================
   files read         : 20
   total events       : 2,000
-  revenue events     : 81
-  total value        : 100,420.31
-  avg value / event  : 50.2102
+  revenue events     : 82
+  total value        : 20,249.77
+  avg value / event  : 10.1249
 
   events by type:
-    page_view       1,202
-    click             508
-    logout            205
-    purchase           81
-    signup              4
+    page_view       1,197
+    click             519
+    logout            179
+    purchase           82
+    signup             23
 
   top 10 users by event count:
-    u0042       29
-    u0087       28
+    u0064       31
+    u0036       31
     ...
 
 ==> Done.
