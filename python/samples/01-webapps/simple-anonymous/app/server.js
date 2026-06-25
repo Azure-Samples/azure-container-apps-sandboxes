@@ -403,10 +403,10 @@ function page() {
     </div>
 
     <pre id="snippet-cli" class="tab-pane block p-6 text-sm overflow-x-auto text-slate-100"><span class="text-slate-500"># Install (Linux / macOS)</span>
-curl -fsSL https://raw.githubusercontent.com/microsoft/azure-container-apps/main/docs/early/aca-cli/install.sh | sh
+curl -fsSL https://aka.ms/aca-cli-install | sh
 
 <span class="text-slate-500"># Install (Windows PowerShell)</span>
-<span class="text-slate-500"># irm https://raw.githubusercontent.com/microsoft/azure-container-apps/main/docs/early/aca-cli/install.ps1 | iex</span>
+<span class="text-slate-500"># irm https://aka.ms/aca-cli-install-ps | iex</span>
 
 <span class="text-slate-500"># 0. Login to Azure</span>
 az login
