@@ -24,7 +24,7 @@ Usage::
     uv run --extra connectors run.py --email path/to/your-email.json --dry-run
 
 ``--dry-run`` skips the actual ``copilot`` invocation and just prints
-the prompt + the egress policy it would apply — useful for iterating
+the prompt + the egress policy it would apply, useful for iterating
 on the prompt template alone.
 """
 
@@ -137,7 +137,7 @@ async def run(args: argparse.Namespace) -> int:
     prompt = _render_prompt(email, run_id)
 
     print("=" * 72)
-    print("LOCAL DEV — connectors-email-triage")
+    print("LOCAL DEV, connectors-email-triage")
     print("=" * 72)
     print(f"run id        : {run_id}")
     print(f"subject       : {email.get('subject', '(none)')[:80]}")
@@ -183,6 +183,13 @@ async def run(args: argparse.Namespace) -> int:
 
                 print("==> Applying egress policy (Deny + Allow + Transform)...")
                 await sandbox.set_egress_default("Deny")
+                # Transform rules below rewrite request headers, which
+                # requires full traffic inspection so the proxy can read
+                # and modify the request. Without it the Set-header
+                # transforms do not fire.
+                _policy = await sandbox.get_egress_policy()
+                _policy.traffic_inspection = "Full"
+                await sandbox.set_egress_policy(_policy)
                 await sandbox.add_egress_host_rule(host, action="Allow")
                 await sandbox.add_egress_transform_rule(
                     host=host,

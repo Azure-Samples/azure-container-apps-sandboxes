@@ -1,15 +1,13 @@
 """Offline gate: structural invariants for the samples tree.
 
-The plain asserts below hold on main today and must stay green. The
-three xfail specs at the bottom document confirmed audit gaps: they
-currently fail, so xfail keeps the gate green while tracking them. When
-each fix lands the spec xpasses and we flip it to a hard assert.
+The plain asserts below hold on main and must stay green. The three
+specs at the bottom encode audit findings A1, A2, and A3; the fixes
+have landed, so they now assert hard.
 """
 
 import re
 import tomllib
 
-import pytest
 import yaml
 
 from conftest import (
@@ -76,14 +74,13 @@ def test_pyproject_declares_expected_extras():
         assert expected in extras, f"missing extra: {expected}"
 
 
-# --- confirmed audit gaps (currently failing) -----------------------------
+# --- audit findings A1, A2, A3 (fixed) ------------------------------------
 
 RAW_INSTALL_RE = re.compile(
     r"raw\.githubusercontent\.com/[^\s\"']*install\.(?:sh|ps1)"
 )
 
 
-@pytest.mark.xfail(strict=False, reason="A1 install URL divergence, see audit")
 def test_a1_install_url_uses_aka_ms():
     offenders = []
     targets = tracked_md_files() + _cli_run_shell_files()
@@ -102,9 +99,6 @@ NAME_FLAG_RE = re.compile(
 )
 
 
-@pytest.mark.xfail(
-    strict=False, reason="A2 --name rejected by aca CLI, must be --group"
-)
 def test_a2_sandboxgroup_subcommands_use_group_flag():
     offenders = []
     for path in _cli_run_shell_files():
@@ -127,10 +121,6 @@ def _has_transform_rule(doc) -> bool:
     return False
 
 
-@pytest.mark.xfail(
-    strict=False,
-    reason="A3 missing trafficInspection: Full on Transform policy",
-)
 def test_a3_deny_transform_policy_sets_traffic_inspection():
     offenders = []
     for path in _cli_egress_yaml_files():

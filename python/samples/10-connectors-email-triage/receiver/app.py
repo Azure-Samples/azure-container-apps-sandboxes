@@ -1,4 +1,4 @@
-"""Receiver — ACA app that boots a sandbox per inbound email event.
+"""Receiver, ACA app that boots a sandbox per inbound email event.
 
 Flow per webhook request:
 
@@ -17,7 +17,7 @@ Flow per webhook request:
 The Connector Gateway API key is fetched from an environment variable
 (``CONNECTOR_GATEWAY_API_KEY``) populated at deploy time by the
 post-deploy script (via the gateway's ``listapikey`` data-plane API).
-The key never enters the sandbox — it lives on the receiver and is
+The key never enters the sandbox, it lives on the receiver and is
 stamped onto outbound requests by the egress proxy.
 """
 
@@ -47,7 +47,7 @@ ACA_SANDBOX_GROUP_REGION = os.environ["ACA_SANDBOX_GROUP_REGION"]
 CONNECTOR_GATEWAY_ID = os.environ["CONNECTOR_GATEWAY_ID"]
 TEAMS_MCP_SERVER_CONFIG_NAME = os.environ["TEAMS_MCP_SERVER_CONFIG_NAME"]
 # Populated by post-deploy. While empty, the receiver still serves
-# health checks but rejects /webhook with 503 until the key arrives —
+# health checks but rejects /webhook with 503 until the key arrives,
 # this is how we avoid running with a broken egress Transform rule.
 CONNECTOR_GATEWAY_API_KEY = os.environ.get("CONNECTOR_GATEWAY_API_KEY", "").strip()
 # Required only when bypassing auth (local dev). In azd-deploy mode,
@@ -56,18 +56,18 @@ WEBHOOK_SHARED_SECRET = os.environ.get("WEBHOOK_SHARED_SECRET", "").strip()
 # GitHub PAT used to authenticate Copilot CLI to GitHub Models (the
 # LLM backend Copilot itself calls). Populated by post-deploy from the
 # `azd env set GITHUB_PAT ...` value. Like CONNECTOR_GATEWAY_API_KEY,
-# this never enters the sandbox — the egress proxy stamps it onto
+# this never enters the sandbox, the egress proxy stamps it onto
 # outbound requests to api.github.com and the two githubcopilot.com
 # hosts at the sandbox boundary.
 GITHUB_PAT = os.environ.get("GITHUB_PAT", "").strip()
 # Optional pre-pinned Teams target. When set, included in the prompt
 # so Copilot doesn't have to ask. When unset, the model is told to
-# look up the channel from its tools — fine for demo but unreliable.
+# look up the channel from its tools, fine for demo but unreliable.
 TEAMS_TEAM_ID = os.environ.get("TEAMS_TEAM_ID", "").strip()
 TEAMS_CHANNEL_ID = os.environ.get("TEAMS_CHANNEL_ID", "").strip()
 
 # GitHub host families Copilot CLI talks to that need an Authorization
-# header. Mirrors scenarios/02-coding-agents/gh-copilot-cli — *not*
+# header. Mirrors scenarios/02-coding-agents/gh-copilot-cli, *not*
 # adding explicit Allow rules for these hosts, because an Allow would
 # short-circuit the Transform and let the request out without the PAT.
 _GITHUB_TRANSFORM_HOSTS: tuple[tuple[str, str, str], ...] = (
@@ -102,7 +102,7 @@ _MCP_ENDPOINT_URL_CACHE: str = ""
 
 
 async def _discover_mcp_endpoint(credential: DefaultAzureCredential) -> str:
-    """ARM GET on the McpServerConfig — returns properties.mcpEndpointUrl."""
+    """ARM GET on the McpServerConfig, returns properties.mcpEndpointUrl."""
     arm = f"https://management.azure.com{CONNECTOR_GATEWAY_ID}/mcpserverconfigs/{TEAMS_MCP_SERVER_CONFIG_NAME}?api-version=2026-05-01-preview"
     token = (await credential.get_token("https://management.azure.com/.default")).token
     async with httpx.AsyncClient(timeout=30.0) as client:
@@ -178,7 +178,7 @@ async def healthz() -> Response:
 
 @app.post("/webhook")
 async def webhook(request: Request) -> dict[str, Any]:
-    # Auth — system-key style for the preview/dev shape. Production
+    # Auth, system-key style for the preview/dev shape. Production
     # should put App Service built-in auth in front of this endpoint
     # and validate an Entra token issued by the gateway's MI; the
     # comment block in the Bicep covers the upgrade path.
@@ -249,7 +249,7 @@ async def _process_one(email: dict[str, Any]) -> None:
 
         await _wait_exec(sandbox)
 
-        # Install Copilot CLI before the egress lockdown — installer
+        # Install Copilot CLI before the egress lockdown, installer
         # hits gh.io etc., which the Deny default would block.
         await _install_copilot(sandbox, run_id)
 
@@ -276,7 +276,7 @@ async def _process_one(email: dict[str, Any]) -> None:
 
 
 async def _wait_exec(sandbox, *, timeout_s: float = 30.0) -> None:
-    """Poll sandbox.exec('true') until it returns 0 — equivalent to
+    """Poll sandbox.exec('true') until it returns 0, equivalent to
     waiting for the per-VM runtime to be reachable."""
     loop = asyncio.get_event_loop()
     deadline = loop.time() + timeout_s
@@ -302,9 +302,15 @@ async def _install_copilot(sandbox, run_id: str) -> None:
 async def _apply_egress_policy(sandbox) -> None:
     mcp_host = _mcp_host()
     await sandbox.set_egress_default("Deny")
+    # The Transform rules below rewrite request headers, which requires
+    # full traffic inspection so the proxy can read and modify the
+    # request. Without it the Set-header transforms do not fire.
+    policy = await sandbox.get_egress_policy()
+    policy.traffic_inspection = "Full"
+    await sandbox.set_egress_policy(policy)
     # MCP host Transform implicitly allows the request through AND
     # stamps the gateway API key. Don't ALSO add a host-allow rule for
-    # the MCP host — a host-allow + Transform on the same host
+    # the MCP host, a host-allow + Transform on the same host
     # short-circuits the Transform.
     await sandbox.add_egress_transform_rule(
         host=mcp_host,
@@ -315,7 +321,7 @@ async def _apply_egress_policy(sandbox) -> None:
         )],
         name="mcp-api-key",
     )
-    # GitHub PAT injection — Copilot CLI needs to authenticate to
+    # GitHub PAT injection, Copilot CLI needs to authenticate to
     # GitHub Models (its LLM backend) and the GitHub auth/API host.
     # If GITHUB_PAT isn't set the egress lockdown still applies but
     # copilot will error 'No authentication information found' on
@@ -334,7 +340,7 @@ async def _apply_egress_policy(sandbox) -> None:
             )
     else:
         log.warning(
-            "GITHUB_PAT is not set — Copilot CLI will fail to authenticate "
+            "GITHUB_PAT is not set, Copilot CLI will fail to authenticate "
             "with GitHub Models. Set it via `azd env set GITHUB_PAT <token>` "
             "and re-run azd hooks run postdeploy."
         )
@@ -366,7 +372,7 @@ async def _stage_prompt(sandbox, email: dict[str, Any], run_id: str) -> None:
     await sandbox.exec("mkdir -p /root/.copilot")
     await sandbox.write_file("/root/.copilot/mcp-config.json", mcp_json.encode("utf-8"))
 
-    # Triage prompt — small, deterministic.  See prompts/triage.md for
+    # Triage prompt, small, deterministic.  See prompts/triage.md for
     # the canonical source.
     prompt = _render_prompt(email, run_id)
     await sandbox.write_file("/tmp/prompt.md", prompt.encode("utf-8"))
@@ -386,7 +392,7 @@ def _render_prompt(email: dict[str, Any], run_id: str) -> str:
             f"  teamId:    {TEAMS_TEAM_ID}\n"
             f"  channelId: {TEAMS_CHANNEL_ID}\n"
             "  content:   <your triage card text>\n"
-            "Do not call ListTeams or ListChannels — the IDs above are "
+            "Do not call ListTeams or ListChannels, the IDs above are "
             "already correct. Use plain text content (no HTML). Do not "
             "invent any other recipients."
         )
@@ -407,7 +413,7 @@ def _render_prompt(email: dict[str, Any], run_id: str) -> str:
 
 async def _run_copilot(sandbox, run_id: str) -> None:
     log.info("[%s] running copilot...", run_id)
-    # Diagnostic — show copilot version + a quick auth status check
+    # Diagnostic, show copilot version + a quick auth status check
     # before the real run, so when something's wrong we can tell whether
     # it's an auth issue vs a network issue vs the prompt itself.
     v = await sandbox.exec("timeout 10s bash -lc 'copilot --version 2>&1 || true'")
@@ -420,7 +426,7 @@ async def _run_copilot(sandbox, run_id: str) -> None:
 
     # TRADE-OFF: Copilot CLI v1 errors immediately if no credential is
     # present in its env (COPILOT_GITHUB_TOKEN / GH_TOKEN / GITHUB_TOKEN)
-    # — it does NOT attempt a network call first. That means the egress
+    # it does NOT attempt a network call first. That means the egress
     # proxy's Transform rule on api.github.com can't intervene to inject
     # the PAT, because Copilot never reaches the network. For
     # non-interactive use we have to put the PAT in the sandbox env
@@ -428,7 +434,7 @@ async def _run_copilot(sandbox, run_id: str) -> None:
     # requests as defense-in-depth, but the sandbox sees the PAT.
     #
     # If you can't accept that trade-off, this scenario isn't the right
-    # fit — switch to scenario 11 (Python tool-calling against AOAI via
+    # fit, switch to scenario 11 (Python tool-calling against AOAI via
     # the egress proxy, no PAT in the sandbox).
     pat_env = ""
     if GITHUB_PAT:
@@ -437,7 +443,7 @@ async def _run_copilot(sandbox, run_id: str) -> None:
     r = await sandbox.exec(
         f"timeout 240s bash -lc '{pat_env}copilot --allow-all-tools -p \"$(cat /tmp/prompt.md)\" 2>&1'"
     )
-    # Don't truncate — when Copilot fails its message includes the full
+    # Don't truncate, when Copilot fails its message includes the full
     # error contract that tells us what to fix next (auth, network, etc.).
     log.info(
         "[%s] copilot exit=%d\nstdout:\n%s\n[--- end stdout ---]",

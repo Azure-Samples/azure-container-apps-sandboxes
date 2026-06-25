@@ -1,11 +1,11 @@
 #!/usr/bin/env bash
-# Shared-blob memory swarm — aca CLI variant.
+# Shared-blob memory swarm, aca CLI variant.
 #
 # Same shape as 01-sandbox-inception/cli, plus: the worker group owns an
 # AzureBlob volume that every worker and the aggregator mount at
 # /mnt/shared. Workers checkpoint JSON to it; an aggregator sandbox
 # (spawned after the workers exit) globs and aggregates. The platform
-# brokers identity/storage behind the mount — no `azure-storage-blob`,
+# brokers identity/storage behind the mount, no `azure-storage-blob`,
 # no SAS, no extra role grants.
 #
 # The same `aca config` ergonomics from variant 01 apply: neither the
@@ -31,12 +31,12 @@ if [[ -f "$dir/.env" ]]; then
     . "$dir/.env"
     set +a
 else
-    echo "error: could not find samples/.env — run setup/cli/setup.sh first" >&2
+    echo "error: could not find samples/.env, run setup/cli/setup.sh first" >&2
     exit 1
 fi
 
 ROLE_NAME="Container Apps SandboxGroup Data Owner"
-CLI_INSTALL_URL="https://raw.githubusercontent.com/microsoft/azure-container-apps/main/docs/early/aca-cli/install.sh"
+CLI_INSTALL_URL="https://aka.ms/aca-cli-install"
 WORKERS=4
 DARTS_PER_WORKER=1000000
 SUFFIX="$(printf '%08x' "$(( (RANDOM<<15) ^ RANDOM ^ ($(date +%s) & 0xffff) ))")"
@@ -76,13 +76,13 @@ aca sandboxgroup create \
 
 aca config sandbox set --group "$ORCH_GROUP" --region "$ACA_SANDBOXGROUP_REGION" >/dev/null
 
-aca sandboxgroup identity assign --name "$ORCH_GROUP" --system-assigned >/dev/null
+aca sandboxgroup identity assign --group "$ORCH_GROUP" --system-assigned >/dev/null
 
-PRINCIPAL_ID="$(aca sandboxgroup identity show --name "$ORCH_GROUP" -o json \
+PRINCIPAL_ID="$(aca sandboxgroup identity show --group "$ORCH_GROUP" -o json \
     | grep -oE '"principalId"[^"]*"[0-9a-fA-F-]+"' \
     | grep -oE '[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}')"
 if [[ -z "$PRINCIPAL_ID" ]]; then
-    echo "error: orchestrator group has no principalId — MI not enabled?" >&2
+    echo "error: orchestrator group has no principalId, MI not enabled?" >&2
     exit 1
 fi
 echo "    principalId: $PRINCIPAL_ID"
@@ -98,7 +98,7 @@ for attempt in 1 2 3 4 5 6 7 8 9 10; do
     if aca sandboxgroup role create \
             --role "$ROLE_NAME" \
             --principal-id "$PRINCIPAL_ID" \
-            --name "$WORKER_GROUP" 2>/tmp/role.err; then
+            --group "$WORKER_GROUP" 2>/tmp/role.err; then
         break
     fi
     if grep -q "RoleAssignmentExists\|already exists" /tmp/role.err 2>/dev/null; then
@@ -115,12 +115,52 @@ for attempt in 1 2 3 4 5 6 7 8 9 10; do
 done
 rm -f /tmp/role.err
 
+# The host created both groups fresh, so it has no data-plane grant on
+# either yet (setup only grants on the samples group). Grant the host Data
+# Owner on the orchestrator group so it can boot the orchestrator sandbox,
+# and on the worker group so it can create the shared volume below.
+HOST_ID="$(az ad signed-in-user show --query id -o tsv 2>/dev/null)"
+if [[ -z "$HOST_ID" ]]; then
+    echo "error: could not resolve signed-in user id (run 'az login')" >&2
+    exit 1
+fi
+echo "==> Granting '$ROLE_NAME' on $ORCH_GROUP -> host user..."
+if ! aca sandboxgroup role create \
+        --role "$ROLE_NAME" \
+        --principal-id "$HOST_ID" \
+        --group "$ORCH_GROUP" 2>/tmp/hostrole.err; then
+    if grep -q "RoleAssignmentExists\|already exists" /tmp/hostrole.err 2>/dev/null; then
+        echo "    host role already assigned"
+    else
+        cat /tmp/hostrole.err >&2
+        echo "error: host role grant on $ORCH_GROUP failed" >&2
+        exit 1
+    fi
+fi
+rm -f /tmp/hostrole.err
+
+echo "==> Granting '$ROLE_NAME' on $WORKER_GROUP -> host user..."
+if ! aca sandboxgroup role create \
+        --role "$ROLE_NAME" \
+        --principal-id "$HOST_ID" \
+        --group "$WORKER_GROUP" 2>/tmp/hostrole.err; then
+    if grep -q "RoleAssignmentExists\|already exists" /tmp/hostrole.err 2>/dev/null; then
+        echo "    host role already assigned"
+    else
+        cat /tmp/hostrole.err >&2
+        echo "error: host role grant on $WORKER_GROUP failed" >&2
+        exit 1
+    fi
+fi
+rm -f /tmp/hostrole.err
+
 echo "==> Waiting 20s for RBAC propagation..."
 sleep 20
 
 echo "==> Creating AzureBlob volume '$VOLUME_NAME' on $WORKER_GROUP..."
-# Volume creation uses the host's `az login` against the worker group;
-# the orchestrator MI will later mount it (Data Owner covers both).
+# Volume creation uses the host's `az login` against the worker group
+# (the host grant above); the orchestrator MI later mounts it via its own
+# worker-group grant.
 # Briefly flip context to the worker group, create, then flip back so
 # the rest of the host script keeps targeting the orchestrator group.
 aca config sandbox set --group "$WORKER_GROUP" --region "$ACA_SANDBOXGROUP_REGION" >/dev/null
@@ -269,7 +309,7 @@ TOTAL_INSIDE="$(printf '%s\n' "$RESULT_LINE" | grep -oE 'INSIDE=[0-9]+' | cut -d
 TOTAL_DARTS="$( printf '%s\n' "$RESULT_LINE" | grep -oE 'TOTAL=[0-9]+'  | cut -d= -f2)"
 
 if [[ -z "${TOTAL_DARTS:-}" || "$TOTAL_DARTS" -eq 0 ]]; then
-    echo "error: aggregator did not report a RESULT line — see output above" >&2
+    echo "error: aggregator did not report a RESULT line, see output above" >&2
     exit 1
 fi
 PI=$(awk "BEGIN{pi=4*$TOTAL_INSIDE/$TOTAL_DARTS; err=pi-3.141592653589793; if(err<0)err=-err; printf \"pi ≈ %.6f  (error %.2e)\", pi, err}")

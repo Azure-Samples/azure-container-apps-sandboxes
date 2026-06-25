@@ -40,38 +40,25 @@ The `aca` CLI itself is installed in the next section.
 ### Linux / macOS
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/microsoft/azure-container-apps/main/docs/early/aca-cli/install.sh | sh
-```
-
-Pin a specific version:
-
-```bash
-curl -fsSL https://raw.githubusercontent.com/microsoft/azure-container-apps/main/docs/early/aca-cli/install.sh \
-  | ACA_VERSION=aca-cli-v0.1.0-early-access sh
+curl -fsSL https://aka.ms/aca-cli-install | sh
 ```
 
 ### Windows (PowerShell)
 
 ```powershell
-irm https://raw.githubusercontent.com/microsoft/azure-container-apps/main/docs/early/aca-cli/install.ps1 | iex
-```
-
-Pin a specific version:
-
-```powershell
-& ([scriptblock]::Create((irm https://raw.githubusercontent.com/microsoft/azure-container-apps/main/docs/early/aca-cli/install.ps1))) -Version aca-cli-v0.1.0-early-access
+irm https://aka.ms/aca-cli-install-ps | iex
 ```
 
 ### Uninstall
 
 ```bash
 # Linux / macOS
-curl -fsSL https://raw.githubusercontent.com/microsoft/azure-container-apps/main/docs/early/aca-cli/install.sh | sh -s -- --uninstall
+curl -fsSL https://aka.ms/aca-cli-install | sh -s -- --uninstall
 ```
 
 ```powershell
 # Windows
-& ([scriptblock]::Create((irm https://raw.githubusercontent.com/microsoft/azure-container-apps/main/docs/early/aca-cli/install.ps1))) -Uninstall
+& ([scriptblock]::Create((irm https://aka.ms/aca-cli-install-ps))) -Uninstall
 ```
 
 ### Supported platforms
