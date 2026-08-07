@@ -36,7 +36,8 @@ A sandbox boots, a Node.js app starts, and a public URL is printed. Open it in a
 |---|---|---|
 | Portal | Browser UI for sandbox groups and sandboxes | [sandboxes.azure.com](https://sandboxes.azure.com) |
 | CLI | Shell scripting and automation | [CLI quickstart](https://sandboxes.azure.com/docs/sandboxes/quickstart/setup-cli) |
-| Python SDK | Programmatic access | [PyPI](https://pypi.org/project/azure-containerapps-sandbox/) |
+| Python SDK (Beta) | Programmatic access | [PyPI](https://pypi.org/project/azure-containerapps-sandbox/) |
+| Typescript SDK (Beta) | Programmatic access | [NMP](https://www.npmjs.com/package/@azure/containerapps-sandbox) |
 
 ## Samples
 
