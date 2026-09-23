@@ -14,16 +14,18 @@ export MSYS_NO_PATHCONV=1
 export MSYS2_ARG_CONV_EXCL='*'
 
 here="$(cd "$(dirname "$0")" && pwd)"
-dir="$here"
-while [[ "$dir" != "/" && ! -f "$dir/.env" ]]; do
-    dir="$(dirname "$dir")"
-done
-if [[ -f "$dir/.env" ]]; then
-    set -a; . "$dir/.env"; set +a
+env_file="$here/../../../../../python/samples/.env"
+if [[ -f "$env_file" ]]; then
+    set -a; . <(tr -d '\r' < "$env_file"); set +a
 else
-    echo "error: could not find samples/.env - run setup/cli/setup.sh first?" >&2
+    echo "error: could not find python/samples/.env - run python python/samples/setup/setup.py from the repo root first" >&2
     exit 1
 fi
+
+# setup.py writes AZURE_SUBSCRIPTION_ID and ACA_SANDBOXGROUP_REGION;
+# aca expects ACA_SUBSCRIPTION and ACA_REGION.
+export ACA_SUBSCRIPTION="${ACA_SUBSCRIPTION:-${AZURE_SUBSCRIPTION_ID:-}}"
+export ACA_REGION="${ACA_REGION:-${ACA_SANDBOXGROUP_REGION:-}}"
 
 DISK="${ACA_WEBAPP_DISK:-node-22}"
 PORT=8080

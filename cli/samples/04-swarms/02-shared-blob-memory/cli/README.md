@@ -11,8 +11,14 @@ worker group, then every worker (and the aggregator) mounts it at
 ./run.sh
 ```
 
-Configuration is read from `samples/.env` (run
-[`python/samples/setup`](../../../../../python/samples/setup) once if you haven't).
+Configuration is read from `python/samples/.env` (run
+`python python/samples/setup/setup.py` from the repository root once
+if you haven't). The script maps setup's subscription and region keys
+to the CLI env vars and removes the host's baseline `ACA_SANDBOX_GROUP`
+override before switching groups with `aca config sandbox set`. Group
+creation attempts to grant the signed-in user Data Owner automatically;
+the script also ensures that host grant succeeded on both groups and
+grants the orchestrator managed identity access to the worker group.
 
 The full scenario story (cast table, sequence diagram, customer-value
 claims, production tips) lives in [`../README.md`](../README.md).
@@ -21,8 +27,9 @@ claims, production tips) lives in [`../README.md`](../README.md).
 
 - **`aca config sandbox set`** on the host so subsequent host `aca`
   calls don't need `--group`/`--region`.
-- **`aca --group $WORKER_GROUP sandboxgroup volume create --type AzureBlob`**,
-  one command, no storage account to provision, no container to wire up.
+- **`aca sandboxgroup volume create --name shared-memory --type AzureBlob`**
+  after selecting the worker group with `aca config sandbox set`, no
+  storage account to provision or container to wire up.
 - **`aca sandbox mount --id $ID --volume $V --path /mnt/shared`**,
   one call per worker (and the aggregator); platform handles identity,
   network, mount semantics.
@@ -38,25 +45,18 @@ write a `worker-i.json` checkpoint to the shared volume, then a
 separate aggregator sandbox reads them back after the workers are
 deleted, π ≈ 3.141 across 4×10⁶ darts.
 
-The CLI variant uses the **same Azure-side setup**, but relies on
-`aca --managed-identity` from inside the orchestrator sandbox.
-In `aca` CLI `1.0.0-beta.1`, this path returns 401 when the CLI
-requests a data-plane token from the in-sandbox MI proxy, the
-managed-identity path works end-to-end through the Python SDK in
-the sibling variant. Once the CLI's MI data-plane scope handling
-lands, this script runs unchanged.
-
-If you want to run the host-side portion only (provision groups +
-grant role + **create the AzureBlob volume** + create orchestrator +
-upload `swarm.sh`), the script will perform those steps successfully
-and stop at the `aca auth status` call inside the orchestrator.
+The CLI variant was audited offline against `aca 1.0.0-preview.4`,
+but has **not** been validated end-to-end on this version. The older
+`1.0.0-beta.1` in-sandbox managed-identity path previously returned
+401; verify token acquisition and worker operations in a live run
+before claiming that regression is fixed. `aca auth status` is
+diagnostic in the script; a failure there does not stop worker creation.
 
 ### Running on Windows
 
-The script targets bash. On Windows, **use Git Bash** (it picks up
-the Windows `aca.exe`, which has the full feature set). WSL bash
-will use a Linux `aca` binary, which in the current beta lacks
-`aca config sandbox set`.
+The script targets bash. On Windows, **use Git Bash** with the Windows
+`aca.exe`. WSL requires a separately installed Linux `aca` binary;
+this variant has not been live-tested on WSL.
 
 The script sets `MSYS_NO_PATHCONV=1` and `MSYS2_ARG_CONV_EXCL='*'`
 so that POSIX paths like `/tmp/swarm.sh` and `/mnt/shared` are

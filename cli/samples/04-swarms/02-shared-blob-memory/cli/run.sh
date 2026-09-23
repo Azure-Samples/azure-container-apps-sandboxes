@@ -8,32 +8,32 @@
 # brokers identity/storage behind the mount, no `azure-storage-blob`,
 # no SAS, no extra role grants.
 #
-# The same `aca config` ergonomics from variant 01 apply: neither the
-# host nor the orchestrator passes `--subscription / --resource-group /
-# --group / --managed-identity` on individual `aca` calls.
+# Sandbox data-plane calls use host config or orchestrator env instead
+# of repeating subscription, resource group, group, and identity flags.
+# Cross-group ARM operations still name their target group explicitly.
 #
-# Reads samples/.env (written by setup/python/setup.py or
-# setup/cli/setup.sh).
+# Reads python/samples/.env (written by python/samples/setup/setup.py).
 
 set -uo pipefail
 
 export MSYS_NO_PATHCONV=1
 export MSYS2_ARG_CONV_EXCL='*'
 
-# ---------------- 0. Source samples/.env ----------------
-dir="$(cd "$(dirname "$0")" && pwd)"
-while [[ "$dir" != "/" && ! -f "$dir/.env" ]]; do
-    dir="$(dirname "$dir")"
-done
-if [[ -f "$dir/.env" ]]; then
+# ---------------- 0. Source python/samples/.env ----------------
+here="$(cd "$(dirname "$0")" && pwd)"
+env_file="$here/../../../../../python/samples/.env"
+if [[ -f "$env_file" ]]; then
     set -a
     # shellcheck disable=SC1091
-    . "$dir/.env"
+    . <(tr -d '\r' < "$env_file")
     set +a
 else
-    echo "error: could not find samples/.env, run setup/cli/setup.sh first" >&2
+    echo "error: could not find python/samples/.env - run python python/samples/setup/setup.py from the repo root first" >&2
     exit 1
 fi
+
+export ACA_SUBSCRIPTION="${ACA_SUBSCRIPTION:-${AZURE_SUBSCRIPTION_ID:-}}"
+export ACA_REGION="${ACA_REGION:-${ACA_SANDBOXGROUP_REGION:-}}"
 
 ROLE_NAME="Container Apps SandboxGroup Data Owner"
 CLI_INSTALL_URL="https://aka.ms/aca-cli-install"
@@ -47,6 +47,10 @@ RUN_ID="$SUFFIX"
 ORIGINAL_SANDBOX_GROUP="${ACA_SANDBOX_GROUP:-}"
 ORCH_ID=""
 
+# setup.py exports a baseline ACA_SANDBOX_GROUP; env wins over config.
+# Let the host's `aca config sandbox set` select the group instead.
+unset ACA_SANDBOX_GROUP
+
 cleanup() {
     set +e
     if [[ -n "$ORCH_ID" ]]; then
@@ -56,7 +60,7 @@ cleanup() {
     fi
     echo "==> Deleting volume $VOLUME_NAME from $WORKER_GROUP..."
     aca config sandbox set --group "$WORKER_GROUP" --region "$ACA_SANDBOXGROUP_REGION" >/dev/null 2>&1
-    aca sandboxgroup volume delete --name "$VOLUME_NAME" --yes >/dev/null 2>&1
+    aca sandboxgroup volume delete --name "$VOLUME_NAME" >/dev/null 2>&1
     for grp in "$ORCH_GROUP" "$WORKER_GROUP"; do
         echo "==> Deleting sandbox group $grp..."
         aca sandboxgroup delete --name "$grp" --yes >/dev/null 2>&1
@@ -115,10 +119,9 @@ for attempt in 1 2 3 4 5 6 7 8 9 10; do
 done
 rm -f /tmp/role.err
 
-# The host created both groups fresh, so it has no data-plane grant on
-# either yet (setup only grants on the samples group). Grant the host Data
-# Owner on the orchestrator group so it can boot the orchestrator sandbox,
-# and on the worker group so it can create the shared volume below.
+# Group creation attempts to grant the signed-in user Data Owner, but that
+# best-effort grant can fail. Ensure host access to both groups before
+# booting the orchestrator and creating the shared volume.
 HOST_ID="$(az ad signed-in-user show --query id -o tsv 2>/dev/null)"
 if [[ -z "$HOST_ID" ]]; then
     echo "error: could not resolve signed-in user id (run 'az login')" >&2
@@ -215,7 +218,7 @@ echo "VOLUME_NAME=$VOLUME_NAME  RUN_ID=$RUN_ID  WORKERS=$WORKERS  DARTS=$DARTS"
 # Atomic write (tmp + mv) so an aggregator never sees a partial file.
 WORKER_SCRIPT='set -e
 mkdir -p /mnt/shared/run-'$RUN_ID'
-python3 - <<PY
+python3 - "$i" "$DARTS" <<PY
 import json, os, random, sys, time
 i = int(sys.argv[1]); n = int(sys.argv[2])
 inside = sum(1 for _ in range(n) if random.random()**2 + random.random()**2 < 1.0)
@@ -239,7 +242,7 @@ worker_run() {
         return
     fi
     "$ACA" sandbox mount --id "$id" --volume "$VOLUME_NAME" --path /mnt/shared >/dev/null 2>&1
-    exec_out="$("$ACA" sandbox exec --id "$id" -c "$WORKER_SCRIPT $i $DARTS" 2>&1)"
+    exec_out="$("$ACA" sandbox exec --id "$id" -c "i=$i DARTS=$DARTS; $WORKER_SCRIPT" 2>&1)"
     t1=$(date +%s.%N)
     dt=$(awk "BEGIN{printf \"%.2f\", $t1 - $t0}")
     echo "WORKER_RESULT $i $id ELAPSED_S=$dt" > "$out"
@@ -276,7 +279,7 @@ inside = total = 0
 for p in paths:
     d = json.load(open(p))
     inside += d["inside"]; total += d["total"]
-    print(f"  {p}: inside={d[\"inside\"]} total={d[\"total\"]}")
+    print("  {}: inside={} total={}".format(p, d["inside"], d["total"]))
 print(f"RESULT INSIDE={inside} TOTAL={total}")
 PY'
 "$ACA" sandbox exec --id "$AGG_ID" -c "$AGG_SCRIPT"
@@ -308,8 +311,8 @@ RESULT_LINE="$(printf '%s\n' "$SWARM_OUTPUT" | grep -E '^RESULT INSIDE=' | tail 
 TOTAL_INSIDE="$(printf '%s\n' "$RESULT_LINE" | grep -oE 'INSIDE=[0-9]+' | cut -d= -f2)"
 TOTAL_DARTS="$( printf '%s\n' "$RESULT_LINE" | grep -oE 'TOTAL=[0-9]+'  | cut -d= -f2)"
 
-if [[ -z "${TOTAL_DARTS:-}" || "$TOTAL_DARTS" -eq 0 ]]; then
-    echo "error: aggregator did not report a RESULT line, see output above" >&2
+if [[ -z "${TOTAL_DARTS:-}" || "$TOTAL_DARTS" -ne "$((WORKERS * DARTS_PER_WORKER))" ]]; then
+    echo "error: expected $((WORKERS * DARTS_PER_WORKER)) aggregated darts, got ${TOTAL_DARTS:-none}; see output above" >&2
     exit 1
 fi
 PI=$(awk "BEGIN{pi=4*$TOTAL_INSIDE/$TOTAL_DARTS; err=pi-3.141592653589793; if(err<0)err=-err; printf \"pi ≈ %.6f  (error %.2e)\", pi, err}")

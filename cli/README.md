@@ -2,7 +2,7 @@
 
 Reference documentation for the `aca` CLI. Covers installation, configuration, and the capabilities that aren't already demonstrated by the functional guides (00 – 13). Each section is independent, jump to whichever topic you need.
 
-> Verified against `aca 1.0.0-beta.1`. Every command and output block was executed before being pasted.
+> Command forms checked against `aca 1.0.0-preview.4` (`aca --help` and command help). Output below is illustrative; the Azure-dependent flows have not been re-run for this version. Check the [published release pin](https://raw.githubusercontent.com/microsoft/azure-container-apps/main/aca-cli/preview/latest-version.txt) for the latest installer version.
 
 ## Contents
 
@@ -49,7 +49,14 @@ curl -fsSL https://aka.ms/aca-cli-install | sh
 irm https://aka.ms/aca-cli-install-ps | iex
 ```
 
+Both installers use the version and platform SHA-256 hash from the
+[published release pin](https://raw.githubusercontent.com/microsoft/azure-container-apps/main/aca-cli/preview/latest-version.txt).
+These installer commands do not offer a version override.
+
 ### Uninstall
+
+Both uninstall commands remove the entire `~/.aca` directory, including
+`config.json`. Back up your CLI configuration first if you need it later.
 
 ```bash
 # Linux / macOS
@@ -73,7 +80,7 @@ curl -fsSL https://aka.ms/aca-cli-install | sh -s -- --uninstall
 
 ```bash
 aca --version
-# aca 1.0.0-beta.1
+# aca 1.0.0-preview.4
 ```
 
 [↑ Back to top](#contents)
@@ -92,24 +99,21 @@ az group create --name my-rg --location eastus2
 # 2. Create a sandbox group (saves config automatically with --set-config)
 aca sandboxgroup create --name my-sandbox-group --location eastus2 --set-config
 
-# 3. Grant yourself data-plane access
-aca sandboxgroup role create \
-  --role "Container Apps SandboxGroup Data Owner" \
-  --principal-id $(az ad signed-in-user show --query id -o tsv)
-
-# 4. Verify setup
+# 3. Verify setup
 aca doctor
 
-# 5. Create a sandbox
+# 4. Create a sandbox
 aca sandbox create --disk ubuntu
 # Created sandbox: a1b2c3d4-…
 
-# 6. Run a command
+# 5. Run a command
 aca sandbox exec --id <sandbox-id> -c "echo hello world"
 
-# 7. Clean up
+# 6. Clean up
 aca sandbox delete --id <sandbox-id> --yes
 ```
+
+`sandboxgroup create` attempts to grant the current caller **Container Apps SandboxGroup Data Owner** on the new group. This is best-effort: if it warns that the grant failed, assign the role manually before creating a sandbox. Use `--skip-role-check` to opt out of the automatic grant. Other users and managed identities still need their own role assignments.
 
 [↑ Back to top](#contents)
 
@@ -117,7 +121,7 @@ aca sandbox delete --id <sandbox-id> --yes
 
 ## Auth
 
-`aca` does not maintain its own credential store. Auth is delegated to the Azure CLI, same identity, same MFA, same conditional-access policies.
+`aca` does not maintain its own credential store. By default auth is delegated to the Azure CLI, same identity, same MFA, same conditional-access policies. Azure-hosted workloads can opt into managed identity.
 
 ```bash
 aca auth login    # delegates to `az login`
@@ -185,8 +189,9 @@ Top-level commands:
 | `aca config`       | Manage CLI configuration |
 | `aca sandboxgroup` | Manage sandbox groups, disks, volumes, secrets, roles, regions |
 | `aca sandbox`      | Create and manage sandboxes (exec, shell, files, ports, egress, snapshots) |
+| `aca express`      | Manage Azure Container Apps Express apps |
 | `aca version`      | Show CLI version |
-| `aca doctor`       | Check prerequisites, config, and RBAC (8 checks) |
+| `aca doctor`       | Check prerequisites, config, and RBAC (General and Sandbox, or General and Express with `--express`) |
 | `aca help`         | Print help for any sub-command |
 
 `aca --help` also prints a **Quick start** block and a **Scenarios** table with copy-pasteable commands for common workflows.
@@ -197,14 +202,13 @@ Top-level commands:
 
 ## Global flags and short forms
 
-Every command accepts these flags. Short forms are listed where they exist.
+Global options are listed below; `--version` is top-level only. Short forms are listed where they exist.
 
 | Flag | Short | Env var | Description |
 |---|---|---|---|
 | `--subscription`      | `-s` | `ACA_SUBSCRIPTION`               | Azure subscription ID |
 | `--resource-group`    | `-g` | `ACA_RESOURCE_GROUP`             | Resource group |
 | `--sandbox-group`     |      | `ACA_SANDBOX_GROUP`              | Default sandbox group (top-level commands) |
-| `--group`             |      |                                  | Sandbox group (on `sandbox`/`sandboxgroup` sub-commands) |
 | `--region`            |      | `ACA_REGION`                     | Data plane region |
 | `--output`            | `-o` |                                  | Output format: `table` (default) or `json` |
 | `--managed-identity`  |      | `ACA_SANDBOX_MANAGED_IDENTITY`   | `system` or a client-id UUID |
@@ -212,6 +216,8 @@ Every command accepts these flags. Short forms are listed where they exist.
 | `--debug`             |      |                                  | Verbose + transport details (⚠ may log secrets) |
 | `--help`              | `-h` |                                  | Show help |
 | `--version`           | `-V` |                                  | Print version (top-level only) |
+
+`--group` is **not** a global flag. Use it on commands that expose it (for example, `aca sandbox delete --group <NAME> --id <ID> --yes`), or use the global `--sandbox-group <NAME>` before a command. `aca config sandbox set --group <NAME>` also stores a sandbox-specific default.
 
 Sandbox lookup flags (on commands that target a sandbox):
 
@@ -350,28 +356,32 @@ For any setting, the CLI resolves in this order (highest wins):
 
 ## `doctor`
 
-`aca doctor` runs 8 prerequisite/config/RBAC checks and tells you what's wrong.
+`aca doctor` reports prerequisite, configuration, and RBAC checks in **General** and **Sandbox** sections. `aca doctor --express` runs **General** and **Express** instead; the number of checks can vary when checks depend on earlier results.
 
 ```bash
 aca doctor
 ```
 
-Sample output (all green):
+Illustrative sandbox-mode output (when all checks are available and pass):
 
 ```
+General checks:
 ✓ Azure CLI found
 ✓ Azure CLI logged in
-✓ Subscription: a59d7183-… (config)
-✓ Resource group: ai-apps-samples-rg (config)
-✓ Sandbox group: ai-apps-samples-group (config: sandbox)
-✓ Region: westus2 (config: sandbox)
+✓ Subscription configured (a59d7183-...) [config]
+✓ Resource group configured (ai-apps-samples-rg) [config]
+✓ ARM authentication working
+
+Sandbox checks:
+✓ Sandbox group: ai-apps-samples-group
+✓ Region: westus2
 ✓ Sandbox group 'ai-apps-samples-group' exists in Azure
 ✓ Container Apps SandboxGroup Data Owner role assigned
 
-aca 1.0.0-beta.1, all checks passed
+9/9 passed
 ```
 
-Each line also shows **where the value came from**, `(config)`, `(config: sandbox)`, `(env)`, `(flag)`, gold when debugging precedence.
+The final line includes the CLI version and overall status. Some General checks show where a value came from (for example, `[config]` or `[env]`). Use `aca doctor -o json` for structured check statuses.
 
 ### What each check verifies, and how to fix it
 
@@ -380,11 +390,14 @@ Each line also shows **where the value came from**, `(config)`, `(config: sandbo
 | Azure CLI found | `az` is on PATH | Install Azure CLI |
 | Azure CLI logged in | `az account show` succeeds | `az login` |
 | Subscription | Resolves a default subscription | `aca config set -s <ID>` or `az account set` |
-| Resource group | Resolves a default RG | `aca config set -g <RG>` |
+| Resource group | Resolves a default RG (warning if absent) | `aca config set -g <RG>` |
+| ARM authentication | Acquires an ARM token | `aca auth login` or `az login` |
 | Sandbox group | Resolves a default sandbox group | `aca config sandbox set --group <NAME>` |
 | Region | Resolves a default region | `aca config sandbox set --region <REGION>` |
 | Sandbox group exists | The group resource is found in Azure | `aca sandboxgroup create --name <NAME> --location <REGION> --set-config` |
-| Data Owner role | Caller has `Container Apps SandboxGroup Data Owner` on the group | `aca sandboxgroup role create --role "Container Apps SandboxGroup Data Owner" --principal-id $(az ad signed-in-user show --query id -o tsv)` |
+| Data Owner role | Caller has `Container Apps SandboxGroup Data Owner` on the group (checked when group and caller are available) | If automatic assignment failed: `aca sandboxgroup role create --role "Container Apps SandboxGroup Data Owner" --principal-id $(az ad signed-in-user show --query id -o tsv)` |
+
+With `--express`, the Express section checks Microsoft.App provider registration and whether the configured Express region is supported instead of checking the sandbox group and its RBAC.
 
 [↑ Back to top](#contents)
 
@@ -573,8 +586,7 @@ aca sandbox list --verbose
 Outputs:
 
 - The **resolved config** dump (where each value came from: flag, env, sandbox-config, shared-config)
-- HTTP **request line**, headers, and status for each call
-- Response headers (bodies elided)
+- HTTP **request line**, headers, status, and request/response bodies (sensitive fields redacted on a best-effort basis)
 
 ### `--debug`
 

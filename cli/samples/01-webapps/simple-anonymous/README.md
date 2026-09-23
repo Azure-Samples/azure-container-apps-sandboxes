@@ -25,7 +25,7 @@ and a get-started panel for visitors to spin up their own.
   - `GET /api/processes` → top 10 by RSS, read from `/proc/[0-9]*`
 - An `aca` CLI driver (`run.sh`) that uploads the app, starts it, and exposes the port.
 - Bounded readiness polling (no fragile `sleep N`) and JSON-shape
-  assertions on every endpoint.
+  assertions on `/healthz`, `/api/hello`, and `/api/info`.
 - A try/finally cleanup that removes the port before deleting the sandbox.
 
 ## Prerequisites
@@ -39,7 +39,7 @@ cd cli
 bash run.sh
 ```
 
-Reads configuration from `samples/.env`. Override the disk image with
+Reads configuration from `python/samples/.env`. Override the disk image with
 `ACA_WEBAPP_DISK=...` (default: `node-22`).
 
 > Prefer the SDK? See the Python version under
