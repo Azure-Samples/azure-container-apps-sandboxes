@@ -65,7 +65,7 @@ sequenceDiagram
 
 ## Prerequisites
 
-- **Azure subscription** with ACA Sandboxes preview enabled.
+- **Azure subscription** with permission to create ACA sandbox groups and assign roles.
 - **You are `Owner` or `User Access Administrator`** on the AOAI account
   (so the launcher can grant `Cognitive Services OpenAI User` to the
   per-run MI). If you only have `Cognitive Services OpenAI User` yourself,
@@ -118,7 +118,7 @@ uv run --extra agents launcher.py --task "..." --workers 3 --keep
 | `403 PermissionDenied` from AOAI after RBAC | Propagation lag (supervisor already retries up to 5 min) | Re-run; first run after fresh role grants can take longer |
 | Orchestrator group has no principalId | SystemAssigned MI didn't materialize | Re-run; rare control-plane race |
 | `CERTIFICATE_VERIFY_FAILED` inside sandbox | AOAI is APIM-fronted with private CA | This demo doesn't support that path yet; use a direct AOAI endpoint |
-| `Container Apps SandboxGroup Data Owner` not found at scope | Sub doesn't have ACA Sandboxes preview enabled | Enable preview, then re-run |
+| `Container Apps SandboxGroup Data Owner` not found at scope | Subscription, sandbox group scope, or role definition could not be resolved | Check the subscription and group scope; register `Microsoft.App` if needed, then retry |
 | `RoleAssignmentExists` | Re-running while previous run's MI still has the role | Safe, launcher skips and proceeds |
 
 ## What this proves vs `01` and `02`

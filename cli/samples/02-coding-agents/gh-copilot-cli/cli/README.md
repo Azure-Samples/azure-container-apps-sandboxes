@@ -27,6 +27,7 @@ scenario-level concepts, architecture diagram, and threat model.
 
 ## Requirements
 
-- `aca` (installed by `python/samples/setup/setup.py`)
+- `aca` CLI installed separately (the `python/samples/setup/setup.py` script provisions the sample group and `.env`, but does not install the CLI)
+- `python/samples/.env` created with `python python/samples/setup/setup.py` from the repo root, or the equivalent `ACA_SUBSCRIPTION`, `ACA_RESOURCE_GROUP`, `ACA_SANDBOX_GROUP`, and `ACA_REGION` environment variables
 - `python3` or `python` (used to parse `aca sandbox list -o json`; auto-detected at runtime)
 - `timeout` (POSIX standard)

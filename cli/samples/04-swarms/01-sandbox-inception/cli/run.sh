@@ -7,12 +7,11 @@
 # inside the agent. Demonstration task: Monte Carlo Pi across the
 # workers, aggregated by the orchestrator.
 #
-# The script is built so `aca config` is the obvious win, neither the
-# host nor the orchestrator carries `--subscription / --resource-group /
-# --group / --managed-identity` flags on individual `aca` calls.
+# Sandbox data-plane calls use host config or orchestrator env instead
+# of repeating subscription, resource group, group, and identity flags.
+# Cross-group ARM operations still name their target group explicitly.
 #
-# Reads samples/.env (written by setup/python/setup.py or
-# setup/cli/setup.sh).
+# Reads python/samples/.env (written by python/samples/setup/setup.py).
 
 set -euo pipefail
 
@@ -22,20 +21,21 @@ set -euo pipefail
 export MSYS_NO_PATHCONV=1
 export MSYS2_ARG_CONV_EXCL='*'
 
-# ---------------- 0. Source samples/.env ----------------
-dir="$(cd "$(dirname "$0")" && pwd)"
-while [[ "$dir" != "/" && ! -f "$dir/.env" ]]; do
-    dir="$(dirname "$dir")"
-done
-if [[ -f "$dir/.env" ]]; then
+# ---------------- 0. Source python/samples/.env ----------------
+here="$(cd "$(dirname "$0")" && pwd)"
+env_file="$here/../../../../../python/samples/.env"
+if [[ -f "$env_file" ]]; then
     set -a
     # shellcheck disable=SC1091
-    . "$dir/.env"
+    . <(tr -d '\r' < "$env_file")
     set +a
 else
-    echo "error: could not find samples/.env, run setup/cli/setup.sh first" >&2
+    echo "error: could not find python/samples/.env - run python python/samples/setup/setup.py from the repo root first" >&2
     exit 1
 fi
+
+export ACA_SUBSCRIPTION="${ACA_SUBSCRIPTION:-${AZURE_SUBSCRIPTION_ID:-}}"
+export ACA_REGION="${ACA_REGION:-${ACA_SANDBOXGROUP_REGION:-}}"
 
 ROLE_NAME="Container Apps SandboxGroup Data Owner"
 CLI_INSTALL_URL="https://aka.ms/aca-cli-install"
@@ -47,11 +47,15 @@ WORKER_GROUP="swarm-workers-$SUFFIX"
 ORIGINAL_SANDBOX_GROUP="${ACA_SANDBOX_GROUP:-}"
 ORCH_ID=""
 
+# setup.py exports a baseline ACA_SANDBOX_GROUP; env wins over config.
+# Let the host's `aca config sandbox set` select the group instead.
+unset ACA_SANDBOX_GROUP
+
 cleanup() {
     set +e
     if [[ -n "$ORCH_ID" ]]; then
         echo "==> Deleting orchestrator sandbox $ORCH_ID..."
-        aca --group "$ORCH_GROUP" sandbox delete --id "$ORCH_ID" --yes >/dev/null 2>&1
+        aca sandbox delete --group "$ORCH_GROUP" --id "$ORCH_ID" --yes >/dev/null 2>&1
     fi
     for grp in "$ORCH_GROUP" "$WORKER_GROUP"; do
         echo "==> Deleting sandbox group $grp..."
@@ -119,10 +123,8 @@ for attempt in 1 2 3 4 5 6 7 8 9 10; do
 done
 rm -f /tmp/role.err
 
-# The host created the orchestrator group fresh, so it has no data-plane
-# grant there yet (setup only grants on the samples group). Grant the host
-# Data Owner on the orchestrator group so it can boot the orchestrator
-# sandbox below.
+# Group creation attempts to grant the signed-in user Data Owner, but that
+# best-effort grant can fail. Ensure host access before booting the sandbox.
 HOST_ID="$(az ad signed-in-user show --query id -o tsv 2>/dev/null)"
 if [[ -z "$HOST_ID" ]]; then
     echo "error: could not resolve signed-in user id (run 'az login')" >&2
@@ -255,8 +257,8 @@ while read -r line; do
     fi
 done <<< "$SWARM_OUTPUT"
 
-if [[ "$TOTAL_DARTS" -eq 0 ]]; then
-    echo "error: no worker results parsed, see output above" >&2
+if [[ "$TOTAL_DARTS" -ne "$((WORKERS * DARTS_PER_WORKER))" ]]; then
+    echo "error: expected $((WORKERS * DARTS_PER_WORKER)) worker darts, got $TOTAL_DARTS; see output above" >&2
     exit 1
 fi
 PI=$(awk "BEGIN{pi=4*$TOTAL_INSIDE/$TOTAL_DARTS; err=pi-3.141592653589793; if(err<0)err=-err; printf \"pi ≈ %.6f  (error %.2e)\", pi, err}")

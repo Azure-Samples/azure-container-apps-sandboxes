@@ -17,17 +17,17 @@ set -euo pipefail
 
 here="$(cd "$(dirname "$0")" && pwd)"
 
-# ---------- load samples/.env (env vars already set take precedence) ----------
-dir="$here"
-while [[ "$dir" != "/" && ! -f "$dir/.env" ]]; do dir="$(dirname "$dir")"; done
-if [[ -f "$dir/.env" ]]; then
+# ---------- load python/samples/.env (env vars already set take precedence) ----------
+env_file="$here/../../../../../python/samples/.env"
+if [[ -f "$env_file" ]]; then
   while IFS='=' read -r k v; do
     [[ -z "$k" || "$k" == \#* ]] && continue
+    v="${v%$'\r'}"
     [[ -z "${!k:-}" ]] && export "$k=$v"
-  done < "$dir/.env"
+  done < "$env_file"
 elif [[ -z "${ACA_SANDBOXGROUP_REGION:-}" && -z "${ACA_REGION:-}" ]]; then
-  echo "error: samples/.env not found and no env vars set. Run setup first:" >&2
-  echo "       python/samples/setup/setup.py  (or populate .env manually)" >&2
+  echo "error: python/samples/.env not found and ACA_REGION unset. Run setup first:" >&2
+  echo "       python python/samples/setup/setup.py (from the repo root), or set the ACA_* env vars" >&2
   exit 2
 fi
 

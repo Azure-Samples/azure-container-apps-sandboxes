@@ -26,7 +26,7 @@ Each pattern is fully self-contained under its own folder:
 ## Pick a pattern
 
 - **simple-anonymous**: start here. Public-internet `Hello world`, easiest
-  thing to demo, no auth setup. Five-line CLI version with one shared Node
+  thing to demo, no auth setup. One CLI script with one shared Node
   app. The landing page proves the box is a
   real VM (live load avg, memory, top processes from `/proc`).
 - **authenticated** *(planned)*, the right pattern for anything

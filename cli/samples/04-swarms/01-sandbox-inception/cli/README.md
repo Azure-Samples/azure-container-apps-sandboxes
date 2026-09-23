@@ -2,16 +2,24 @@
 
 Same scenario as the Python variant, but the orchestration is bash +
 the `aca` CLI. The script is structured so that **`aca config`** is
-the obvious ergonomic win, neither the host nor the orchestrator pass
-`--subscription` / `--resource-group` / `--group` / `--managed-identity`
-on individual `aca` calls.
+the obvious ergonomic win: host sandbox operations use a configured
+group, while the orchestrator's worker operations use environment
+variables. Cross-group ARM commands (identity and role assignment)
+still use `--group` to name their target.
 
 ```bash
 ./run.sh
 ```
 
-Configuration is read from `samples/.env` (run [`python/samples/setup`](../../../../../python/samples/setup)
-once if you haven't).
+Configuration is read from `python/samples/.env` (run
+`python python/samples/setup/setup.py` from the repository root once
+if you haven't). The script maps setup's `AZURE_SUBSCRIPTION_ID` and
+`ACA_SANDBOXGROUP_REGION` to the CLI's `ACA_SUBSCRIPTION` and `ACA_REGION`.
+It removes the host's `ACA_SANDBOX_GROUP` env override before switching
+groups with `aca config sandbox set`, because env takes precedence over
+saved config. Group creation attempts to grant the signed-in user Data
+Owner automatically; the script also ensures that host grant succeeded
+and grants the orchestrator managed identity access to the worker group.
 
 The full scenario story (architecture diagram, four customer-value
 claims, production tips) lives in [`../README.md`](../README.md).
@@ -22,25 +30,18 @@ End-to-end validated against the **Python SDK variant**
 (see `python/samples/04-swarms/01-sandbox-inception/python/swarm.py`) on `westus2`, π estimated to ±7×10⁻⁴
 across 4 worker sandboxes spawned via managed identity.
 
-The CLI variant uses the same Azure-side setup but relies on
-`aca --managed-identity` from inside the orchestrator sandbox.
-In `aca` CLI `1.0.0-beta.1`, this path returns 401 when the CLI
-requests a data-plane token from the in-sandbox MI proxy, the
-managed-identity work end-to-end through the Python SDK in the
-sibling variant. Once the CLI's MI data-plane scope handling lands,
-this script runs unchanged.
-
-If you want to run the host-side portion only (provision groups +
-grant role + create orchestrator + upload `swarm.sh`), the script
-will perform those steps successfully and stop at the `aca auth
-status` call inside the orchestrator.
+The CLI variant was audited offline against `aca 1.0.0-preview.4`,
+but has **not** been validated end-to-end on this version. The older
+`1.0.0-beta.1` in-sandbox managed-identity path previously returned
+401; verify token acquisition and worker operations in a live run
+before claiming that regression is fixed. `aca auth status` is
+diagnostic in the script; a failure there does not stop worker creation.
 
 ### Running on Windows
 
-The script targets bash. On Windows, **use Git Bash** (it picks up
-the Windows `aca.exe`, which has the full feature set). WSL bash
-will use a Linux `aca` binary, which in the current beta lacks
-`aca config sandbox set`.
+The script targets bash. On Windows, **use Git Bash** with the Windows
+`aca.exe`. WSL requires a separately installed Linux `aca` binary;
+this variant has not been live-tested on WSL.
 
 The script sets `MSYS_NO_PATHCONV=1` and `MSYS2_ARG_CONV_EXCL='*'`
 so that POSIX paths like `/tmp/swarm.sh` are passed through
@@ -57,21 +58,23 @@ over passing `--subscription` / `--resource-group` / `--group` /
 this swarm, host driving Group A, sandbox driving Group B, and
 config makes each one implicit.
 
-**Host side (driving Group A)**, set the orchestrator group as the
-current sandbox context once; every later `aca` call uses it:
+**Host side (driving Group A)**, allow the saved config to select the
+orchestrator group for sandbox commands. The setup `.env` includes
+`ACA_SANDBOX_GROUP`, so first remove that higher-priority env override:
 
 ```bash
-aca config set -s "$ACA_SUBSCRIPTION" -r "$ACA_RESOURCE_GROUP"
-aca config sandbox set --group "$ORCH_GROUP"   # auto-detects region too
-aca config show                                # printed in run output
+export ACA_SUBSCRIPTION="${ACA_SUBSCRIPTION:-$AZURE_SUBSCRIPTION_ID}"
+export ACA_REGION="${ACA_REGION:-$ACA_SANDBOXGROUP_REGION}"
+unset ACA_SANDBOX_GROUP
+aca config sandbox set --group "$ORCH_GROUP" --region "$ACA_REGION"
+aca config show
 
-aca sandboxgroup identity assign --system-assigned --name "$ORCH_GROUP"
+aca sandboxgroup identity assign --group "$ORCH_GROUP" --system-assigned
 aca sandbox create --disk ubuntu               # implicit --group from config
 ```
 
-**Sandbox side (driving Group B)**, env vars are the same source of
-truth as `aca config`, so a few `export`s flip the orchestrator's
-entire context onto the worker group + MI auth:
+**Sandbox side (driving Group B)**, env vars override saved config and
+select the worker group and managed identity for sandbox operations:
 
 ```bash
 export ACA_SUBSCRIPTION=...
@@ -80,18 +83,17 @@ export ACA_SANDBOX_GROUP="$WORKER_GROUP"
 export ACA_SANDBOX_MANAGED_IDENTITY=system     # use the group's MI
 export ACA_REGION=...
 
-/tmp/aca auth status                           # one-line proof: ARM authed via MI
+aca auth status                                # diagnostics for ARM and data-plane auth
 for i in $(seq 0 $((WORKERS-1))); do
-    /tmp/aca sandbox create --disk ubuntu --label worker=$i &
+    aca sandbox create --disk ubuntu --label worker=$i &
 done
 wait                                           # parallel fan-out, 4 lines
 ```
 
-Without `aca config`, the same loop would carry
+Without config or env defaults, the same loop would carry
 `--subscription X --resource-group Y --group Z --managed-identity system`
-on every line, noisy, error-prone, and obscures the swarm logic. With
-config, the loop reads as the intent: *create four worker sandboxes*.
+on every line. Commands that intentionally target another group,
+such as the host's worker-group role grant, still specify `--group`.
 
-`aca config show` runs **twice** in the script, once on the host,
-once inside the orchestrator, and both outputs are printed, so you
-see the two contexts side-by-side.
+The script prints `aca config show` on the host and the effective
+worker-context env vars inside the orchestrator.
