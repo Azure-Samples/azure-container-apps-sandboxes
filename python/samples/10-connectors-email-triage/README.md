@@ -102,7 +102,7 @@ Where the gateway API key lives (and doesn't):
 | **Azure Developer CLI** (`azd`) | `azd up` orchestrates provision + deploy + post-deploy | <https://learn.microsoft.com/azure/developer/azure-developer-cli/install-azd> |
 | **Docker** | `azd deploy receiver` builds the receiver image | any local container runtime, Docker Desktop, Podman, etc. |
 | **Subscription with Connector Gateway preview enabled** | gateway is in preview | Build 2026 preview, confirm region availability before deploying |
-| **ACA sandbox group preview** | sandboxes pillar | the rest of `samples/sandboxes/` already requires this |
+| **ACA Sandboxes access** | create the sandbox group and run sandboxes | Sandboxes is generally available; no Sandboxes preview opt-in is required |
 | **An M365 mailbox + a Teams team you can post to** | OAuth consent during post-deploy | personal dev tenant is fine |
 
 ## Cloud-deployed quickstart (`azd up`)

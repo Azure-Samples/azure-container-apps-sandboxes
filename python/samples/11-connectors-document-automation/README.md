@@ -266,8 +266,8 @@ For **true per-file isolation**, one ACA Sandbox per invoice,
 destroyed after, the host listener would spawn a child sandbox per
 incoming trigger. That requires an Azure credential **inside** the
 host sandbox to call `Microsoft.App/sandboxGroups/.../begin_create_sandbox`.
-Whether sandboxes expose IMDS / an attached MI in this preview is
-not yet confirmed. When that lands, the listener becomes a tiny
-dispatcher and the GitHub PAT trade-off goes away too (each child
+Whether this scenario can use IMDS / an attached MI inside its host
+sandbox has not yet been confirmed. If supported, the listener becomes
+a tiny dispatcher and the GitHub PAT trade-off goes away too (each child
 sandbox gets its own egress policy that injects the PAT inline at
 the boundary).

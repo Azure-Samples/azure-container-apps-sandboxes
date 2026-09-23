@@ -2,6 +2,8 @@
 
 Reference documentation for the `aca` CLI. Covers installation, configuration, and the capabilities that aren't already demonstrated by the functional guides (00 – 13). Each section is independent, jump to whichever topic you need.
 
+[Azure Container Apps Sandboxes](https://techcommunity.microsoft.com/blog/appsonazureblog/azure-container-apps-sandboxes-now-generally-available/4559125) and [Azure Container Apps Express](https://techcommunity.microsoft.com/blog/appsonazureblog/azure-container-apps-express-is-now-generally-available/4559101) are generally available. The CLI version below still carries a `preview` suffix; that suffix is not the product availability status.
+
 > Command forms checked against `aca 1.0.0-preview.4` (`aca --help` and command help). Output below is illustrative; the Azure-dependent flows have not been re-run for this version. Check the [published release pin](https://raw.githubusercontent.com/microsoft/azure-container-apps/main/aca-cli/preview/latest-version.txt) for the latest installer version.
 
 ## Contents

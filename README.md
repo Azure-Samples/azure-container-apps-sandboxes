@@ -2,6 +2,8 @@
 
 Secure, isolated compute environments with sub-second startup for agentic workloads.
 
+[Azure Container Apps Sandboxes is generally available](https://techcommunity.microsoft.com/blog/appsonazureblog/azure-container-apps-sandboxes-now-generally-available/4559125).
+
 ## Quick start
 
 ### Prerequisites
