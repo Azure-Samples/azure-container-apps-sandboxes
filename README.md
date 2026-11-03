@@ -63,7 +63,7 @@ Each scenario includes a README with architecture notes, prerequisites, and step
 | 05 | data-processing | Producer/consumer pipelines on shared AzureBlob volumes | [Python](python/samples/05-data-processing) | - |
 | 06 | developer-workflows | PR builds, ephemeral CI, on-demand dev environments | [Python](python/samples/06-developer-workflows) | - |
 | 07 | computer-use | LLM computer-use agent driving Chrome inside a sandbox | - | - |
-| 08 | sandbox-agents | Agent frameworks (OpenAI, Claude, LangChain) using sandboxes as tool-execution backend | [Python](python/samples/08-sandbox-agents) | - |
+| 08 | sandbox-agents | Agent frameworks (OpenAI, Claude, LangChain) using sandboxes as tool-execution backend; [resumable human approval](python/samples/08-sandbox-agents/openai/04-resumable-approval) across application runs | [Python](python/samples/08-sandbox-agents) | - |
 | 09 | mcp-hosting | Host MCP servers in a sandbox | [Python](python/samples/09-mcp-hosting) | - |
 | 10 | connectors-email-triage | Outlook trigger → sandbox → Copilot CLI → Teams triage card | [Python](python/samples/10-connectors-email-triage) | - |
 | 11 | connectors-document-automation | SharePoint trigger → sandbox → document extraction → results uploaded | [Python](python/samples/11-connectors-document-automation) | - |

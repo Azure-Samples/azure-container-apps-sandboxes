@@ -30,6 +30,14 @@ Each subfolder ships:
   `README.md`, following the same shape as the
   realized OpenAI variant.
 
+## Persisting a session across application runs
+
+See [Resumable agent with human approval](openai/04-resumable-approval) for a
+small Chat Completions harness that checkpoints its conversation, suspends
+the sandbox for human review, exits, and resumes the same sandbox in a later
+process only after explicit approval. It uses the `openai` extra rather than
+the Agents SDK provider. Offline tests cover the approval and lifecycle flow.
+
 ## The shared pattern
 
 Every framework above splits the same way:
