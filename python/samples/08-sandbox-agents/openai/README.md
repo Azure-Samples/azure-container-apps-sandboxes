@@ -17,6 +17,7 @@ provider** that runs every tool call inside an isolated
 | [`01-deep-research-single/`](01-deep-research-single) | **Deep Research Agent**, single `SandboxAgent` clones a GitHub repo into one sandbox and answers a question with file citations. |
 | [`02-swarm-research-parallel/`](02-swarm-research-parallel) | **Research Swarm**, host orchestrator fans research subtasks out across N parallel sandboxes, each running its own `SandboxAgent`, then aggregates the findings. |
 | [`03-autonomous-swarm/`](03-autonomous-swarm) | **Autonomous Swarm (Harness IN Compute)**, the **supervisor itself** runs inside an ACA sandbox and uses its SystemAssigned Managed Identity for both Azure OpenAI (`Cognitive Services OpenAI User`) and a peer worker sandbox group (`Container Apps SandboxGroup Data Owner`). **No AOAI key, client secret, or user credential ever enters any sandbox.** |
+| [`04-resumable-approval/`](04-resumable-approval) | **Resumable human approval**, a standalone Chat Completions harness (not the Agents SDK provider) saves conversation state, suspends for review, then resumes the same sandbox in a separate process after explicit approval. |
 
 
 ## Why "first-class provider" matters
