@@ -1,0 +1,12 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Remove="workload\**\*.cs" />
+    <ProjectReference Include="..\..\shared\SandboxSampleSupport\SandboxSampleSupport.csproj" />
+    <Content Include="workload\bin\Release\net10.0\linux-x64\publish\PipelineWorker"
+             Link="workload\PipelineWorker" CopyToOutputDirectory="PreserveNewest"
+             Condition="Exists('workload\bin\Release\net10.0\linux-x64\publish\PipelineWorker')" />
+  </ItemGroup>
+</Project>

@@ -1,0 +1,10 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\shared\SandboxSampleSupport\SandboxSampleSupport.csproj" />
+    <Content Include="..\..\..\..\python\samples\01-webapps\simple-anonymous\app\server.js"
+             Link="app\server.js" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+</Project>

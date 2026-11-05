@@ -1,0 +1,24 @@
+<Solution>
+  <Folder Name="/samples/" />
+  <Folder Name="/samples/01-webapps/" />
+  <Folder Name="/samples/01-webapps/simple-anonymous/">
+    <Project Path="samples/01-webapps/simple-anonymous/WebAppSample.csproj" />
+  </Folder>
+  <Folder Name="/samples/02-coding-agents/gh-copilot-cli/">
+    <Project Path="samples/02-coding-agents/gh-copilot-cli/CodingAgentSample.csproj" />
+  </Folder>
+  <Folder Name="/samples/03-data-processing/">
+    <Project Path="samples/03-data-processing/PipelineSample.csproj" />
+    <Project Path="samples/03-data-processing/workload/PipelineWorker.csproj" />
+  </Folder>
+  <Folder Name="/samples/04-developer-workflows/">
+    <Project Path="samples/04-developer-workflows/CiSample.csproj" />
+  </Folder>
+  <Folder Name="/samples/05-mcp-hosting/excalidraw-anonymous/">
+    <Project Path="samples/05-mcp-hosting/excalidraw-anonymous/McpHostingSample.csproj" />
+  </Folder>
+  <Folder Name="/shared/">
+    <Project Path="shared/SandboxSampleSupport/SandboxSampleSupport.csproj" />
+  </Folder>
+  <Project Path="tests/SandboxSamples.Tests.csproj" />
+</Solution>
