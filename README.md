@@ -39,7 +39,7 @@ A sandbox boots, a Node.js app starts, and a public URL is printed. Open it in a
 | Portal | Browser UI for sandbox groups and sandboxes | [sandboxes.azure.com](https://sandboxes.azure.com) |
 | CLI | Shell scripting and automation | [CLI quickstart](https://sandboxes.azure.com/docs/sandboxes/quickstart/setup-cli) |
 | Python SDK | Programmatic access | [PyPI](https://pypi.org/project/azure-containerapps-sandbox/) |
-| .NET SDK | Programmatic access using the .NET SDK NuGet package | [.NET setup and samples](dotnet/README.md) |
+| .NET SDK | Programmatic access using the .NET SDK NuGet package | [dotnet](dotnet/README.md) |
 
 ## Samples
 
@@ -57,15 +57,15 @@ Each scenario includes a README with architecture notes, prerequisites, and step
 
 | # | Scenario | What it shows | Python | CLI | .NET |
 |---|---|---|---|---|---|
-| 01 | webapps | Web app in a sandbox, anonymous or Entra-gated | [Python](python/samples/01-webapps) | [CLI](cli/samples/01-webapps) | [.NET 01](dotnet/samples/01-webapps/simple-anonymous) |
-| 02 | coding-agents | Copilot CLI in a sandbox with deny-default egress | [Python](python/samples/02-coding-agents) | [CLI](cli/samples/02-coding-agents) | [.NET 02](dotnet/samples/02-coding-agents/gh-copilot-cli) |
+| 01 | webapps | Web app in a sandbox, anonymous or Entra-gated | [Python](python/samples/01-webapps) | [CLI](cli/samples/01-webapps) | [dotnet](dotnet/samples/01-webapps/simple-anonymous) |
+| 02 | coding-agents | Copilot CLI in a sandbox with deny-default egress | [Python](python/samples/02-coding-agents) | [CLI](cli/samples/02-coding-agents) | [dotnet](dotnet/samples/02-coding-agents/gh-copilot-cli) |
 | 03 | code-interpreter | LLM-driven code execution: generate, run, observe, iterate | [Python](python/samples/03-code-interpreter) | - | - |
 | 04 | swarms | Orchestrator coordinating many sandbox workers | [Python](python/samples/04-swarms) | [CLI](cli/samples/04-swarms) | - |
-| 05 | data-processing | Producer/consumer pipelines on shared AzureBlob volumes | [Python](python/samples/05-data-processing) | - | [.NET 03](dotnet/samples/03-data-processing) |
-| 06 | developer-workflows | PR builds, ephemeral CI, on-demand dev environments | [Python](python/samples/06-developer-workflows) | - | [.NET 04](dotnet/samples/04-developer-workflows) |
+| 05 | data-processing | Producer/consumer pipelines on shared AzureBlob volumes | [Python](python/samples/05-data-processing) | - | [dotnet](dotnet/samples/03-data-processing) |
+| 06 | developer-workflows | PR builds, ephemeral CI, on-demand dev environments | [Python](python/samples/06-developer-workflows) | - | [dotnet](dotnet/samples/04-developer-workflows) |
 | 07 | computer-use | LLM computer-use agent driving Chrome inside a sandbox | - | - | - |
 | 08 | sandbox-agents | Agent frameworks (OpenAI, Claude, LangChain) using sandboxes as tool-execution backend | [Python](python/samples/08-sandbox-agents) | - | - |
-| 09 | mcp-hosting | Host MCP servers in a sandbox | [Python](python/samples/09-mcp-hosting) | - | [.NET 05 (Excalidraw)](dotnet/samples/05-mcp-hosting/excalidraw-anonymous) |
+| 09 | mcp-hosting | Host MCP servers in a sandbox | [Python](python/samples/09-mcp-hosting) | - | [dotnet](dotnet/samples/05-mcp-hosting/excalidraw-anonymous) |
 | 10 | connectors-email-triage | Outlook trigger → sandbox → Copilot CLI → Teams triage card | [Python](python/samples/10-connectors-email-triage) | - | - |
 | 11 | connectors-document-automation | SharePoint trigger → sandbox → document extraction → results uploaded | [Python](python/samples/11-connectors-document-automation) | - | - |
 
